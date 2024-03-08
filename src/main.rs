@@ -12,7 +12,7 @@ let y = 10\n\
 let result = x + y\n\
 print result\n\
 x = 2\n\
-print x * y\
+print x * y\n\
 ";
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {

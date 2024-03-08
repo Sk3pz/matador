@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use better_term::{Color, flush_styles};
-use crate::lexer::{Operator, TokenType};
+use crate::lexer::Operator;
 use crate::parser::Node;
 
 // Interpreter
@@ -43,6 +43,7 @@ impl Interpreter {
                 }
             }
             Node::Ident(ident) => {
+                // todo: proper error handling
                 *self.env.get(&ident).unwrap_or_else(|| panic!("Undefined variable"))
             },
             Node::Print(node) => {
