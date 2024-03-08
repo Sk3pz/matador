@@ -37,4 +37,19 @@ y = x * y + result
 print y
 print str
 
+// conditionals
+if true {
+    print "This is true"
+} else {
+    print "This is false"
+}
+
+if x == 2 {
+   print "x is 2"
+} else if x == 3 {
+   print "x is 3"
+} else {
+   print "x is not 2 or 3"
+}
+
 print "This is Matador (" + b + ")! 🐂"

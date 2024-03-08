@@ -1,14 +1,13 @@
 use std::time::Duration;
 use better_term::{Color, flush_styles};
 use crate::lexer::Lexer;
-use crate::parser::Node;
 
 mod parser;
 mod interpreter;
 mod lexer;
 mod literal;
 
-const TEST_CODE: &str = include_str!("../matador_tests/matador_test.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/full_test.mtdr");
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {
     let start = std::time::Instant::now();
@@ -26,6 +25,7 @@ fn main() {
     });
     //println!("{}Lexed in {}{:?}", Color::BrightGreen, Color::BrightYellow, lex_time);
     //println!("{}Parsing tokens..", Color::BrightYellow);
+    let token_length = tokens.len();
     //flush_styles();
     let (nodes, parse_time) = timed(|| {
         let mut parser = parser::Parser::new(tokens);
@@ -40,6 +40,8 @@ fn main() {
         interpreter.interpret(nodes);
     });
     //println!("{}Interpreted in {}{:?}", Color::BrightGreen, Color::BrightYellow, interpret_time);
-    println!("{}Ran code in {}{:?}", Color::BrightGreen, Color::BrightYellow, interpret_time + parse_time + lex_time);
+    println!("{}Ran code in {}{:?} {}with {}{} {}tokens", Color::BrightGreen, Color::BrightYellow,
+             interpret_time + parse_time + lex_time
+             , Color::BrightGreen, Color::BrightYellow, token_length, Color::BrightGreen);
     flush_styles();
 }

@@ -16,6 +16,11 @@ pub enum TokenType {
     Assign,
     Op(Operator),
 
+    // block outlines
+    // not in operators as they are not used in the same way
+    LBrace,
+    RBrace,
+
     // identifiers
     Ident(String),
 
@@ -52,22 +57,39 @@ impl Display for StaticType {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Operator {
+    // arithmetic
     Plus,   // +
     Minus,  // -
     Mul,    // *
     Div,    // /
     Mod,    // %
     Pow,    // **
+
+    // misc
+    Dec,    // .
+    Range,  // ..
+
+    // control flow
+    LParen, // (
+    RParen, // )
+    LBracket, // [
+    RBracket, // ]
+
+    // bitwise
+    And,    // &
+    Or,     // |
+    Xor,    // ^
+    Not,    // !
+    LShift, // <<
+    RShift, // >>
+
+    // conditionals
     Eq,     // ==
     Neq,    // !=
     Gt,     // >
     Lt,     // <
     Gte,    // >=
     Lte,    // <=
-    LParen, // (
-    RParen, // )
-    Dec,    // .
-    Range,  // ..
 }
 
 impl Display for Operator {
@@ -79,16 +101,24 @@ impl Display for Operator {
             Operator::Div => "/",
             Operator::Mod => "%",
             Operator::Pow => "**",
+            Operator::Dec => ".",
+            Operator::Range => "..",
+            Operator::LParen => "(",
+            Operator::RParen => ")",
+            Operator::LBracket => "[",
+            Operator::RBracket => "]",
+            Operator::And => "&",
+            Operator::Or => "|",
+            Operator::Xor => "^",
+            Operator::Not => "~",
+            Operator::LShift => "<<",
+            Operator::RShift => ">>",
             Operator::Eq => "==",
             Operator::Neq => "!=",
             Operator::Gt => ">",
             Operator::Lt => "<",
             Operator::Gte => ">=",
             Operator::Lte => "<=",
-            Operator::LParen => "(",
-            Operator::RParen => ")",
-            Operator::Dec => ".",
-            Operator::Range => "..",
         };
         write!(f, "{}", op)
     }
@@ -119,7 +149,7 @@ impl<'a> Lexer<'a> {
         let mut tokens = Vec::new();
         while self.pos < self.chars.len() {
             let token = self.next_token();
-            //println!("{:?}", token);
+            println!("{:?}", token);
             tokens.push(token);
         }
         tokens.push(Token {
@@ -191,15 +221,28 @@ impl<'a> Lexer<'a> {
             "/" => TokenType::Op(Operator::Div),
             "%" => TokenType::Op(Operator::Mod),
             "**" => TokenType::Op(Operator::Pow),
+            "." => TokenType::Op(Operator::Dec),
+            ".." => TokenType::Op(Operator::Range),
+            "(" => TokenType::Op(Operator::LParen),
+            ")" => TokenType::Op(Operator::RParen),
+            "[" => TokenType::Op(Operator::LBracket),
+            "]" => TokenType::Op(Operator::RBracket),
+            "{" => TokenType::LBrace,
+            "}" => TokenType::RBrace,
+            "&" => TokenType::Op(Operator::And),
+            "|" => TokenType::Op(Operator::Or),
+            "^" => TokenType::Op(Operator::Xor),
+            "~" => TokenType::Op(Operator::Not),
+            "<<" => TokenType::Op(Operator::LShift),
+            ">>" => TokenType::Op(Operator::RShift),
+
+            // conditionals
             "==" => TokenType::Op(Operator::Eq),
             "!=" => TokenType::Op(Operator::Neq),
             ">" => TokenType::Op(Operator::Gt),
             "<" => TokenType::Op(Operator::Lt),
             ">=" => TokenType::Op(Operator::Gte),
             "<=" => TokenType::Op(Operator::Lte),
-            "(" => TokenType::Op(Operator::LParen),
-            ")" => TokenType::Op(Operator::RParen),
-            "." => TokenType::Op(Operator::Dec),
 
             // literals
             "true" | "false" => {
@@ -215,6 +258,7 @@ impl<'a> Lexer<'a> {
                 TokenType::String(builder.clone())
             },
             _ if builder.chars().all(|c| c.is_digit(10) || c == '.' || c == '-') => {
+                // todo: math does not allow for parentheses right now
                 if builder.contains('.') {
                     TokenType::Float(builder.parse().unwrap())
                 } else {

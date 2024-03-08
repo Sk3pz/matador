@@ -126,6 +126,27 @@ impl Literal {
         }
     }
 
+    pub fn xor(&self, other: &Literal) -> Option<Literal> {
+        match (self, other) {
+            (Literal::Bool(a), Literal::Bool(b)) => Some(Literal::Bool(*a ^ *b)),
+            _ => None,
+        }
+    }
+
+    pub fn shl(&self, other: &Literal) -> Option<Literal> {
+        match (self, other) {
+            (Literal::Int(a), Literal::Int(b)) => Some(Literal::Int(a << b)),
+            _ => None,
+        }
+    }
+
+    pub fn shr(&self, other: &Literal) -> Option<Literal> {
+        match (self, other) {
+            (Literal::Int(a), Literal::Int(b)) => Some(Literal::Int(a >> b)),
+            _ => None,
+        }
+    }
+
     pub fn not(&self) -> Option<Literal> {
         match self {
             Literal::Bool(a) => Some(Literal::Bool(!*a)),
