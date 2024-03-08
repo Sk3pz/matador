@@ -78,13 +78,21 @@ See [tests](./matador_tests) for more examples.
 
 Todo:
 - [x] basic arithmetic
+  - [x] addition / subtraction
+  - [x] multiplication / division
+  - [x] modulo
+  - [x] unary negation
+  - [x] negation
+  - [x] power
+  - [x] comparison
+  - [x] bitwise / logical
+  - [ ] parentheses
 - [x] comments
 - [x] types
 - [x] variables
-- [x] print
-- [ ] parentheses in arithmetic
+- [x] printing
+- [x] conditionals (if/else)
 - [ ] static type checking and declaration
-- [ ] conditionals
 - [ ] loops
 - [ ] functions
 - [ ] arrays
