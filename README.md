@@ -78,10 +78,16 @@ See [tests](./matador_tests) for more examples.
 
 Todo:
 - [x] basic arithmetic
+- [x] comments
 - [x] types
 - [x] variables
 - [x] print
 - [ ] parentheses in arithmetic
+- [ ] static type checking and declaration
 - [ ] conditionals
 - [ ] loops
 - [ ] functions
+- [ ] arrays
+- [ ] maps
+- [ ] structs
+- [ ] expose API for creating libraries
