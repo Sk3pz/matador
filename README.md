@@ -12,7 +12,7 @@
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⣿⠆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠷⣦⣤⡾⠋⠀ 
 # Matador
-Matador is an interpreted programming language designed for stock analysis using Chroma.
+Matador is an interpreted programming language written in rust designed for stock analysis using Chroma.
 ### Code Example (Currently runs):
 ```
 /*
