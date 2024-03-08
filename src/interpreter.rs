@@ -1,33 +1,56 @@
+use std::collections::HashMap;
+use better_term::{Color, flush_styles};
+use crate::lexer::{Operator, TokenType};
+use crate::parser::Node;
 
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum Expr {
-    Literal(i32),
-    Binary(Box<Expr>, Op, Box<Expr>),
+// Interpreter
+pub struct Interpreter {
+    env: HashMap<String, i64>,
 }
 
-impl Expr {
-    pub fn eval(&self) -> i32 {
-        match self {
-            Expr::Literal(n) => *n,
-            Expr::Binary(lhs, op, rhs) => {
-                let lhs = lhs.eval();
-                let rhs = rhs.eval();
-                match op {
-                    Op::Add => lhs + rhs,
-                    Op::Sub => lhs - rhs,
-                    Op::Mul => lhs * rhs,
-                    Op::Div => lhs / rhs,
-                }
-            }
+impl Interpreter {
+    pub fn new() -> Self {
+        Interpreter {
+            env: HashMap::new(),
         }
     }
-}
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub enum Op {
-    Add,
-    Sub,
-    Mul,
-    Div,
+    pub fn interpret(&mut self, nodes: Vec<Node>) {
+        for node in nodes {
+            self.eval(node);
+        }
+    }
+
+    // todo: this assumes variables are only integers, no other types are supported
+    fn eval(&mut self, node: Node) -> i64 {
+        match node {
+            Node::Literal(n) => n,
+            Node::BinOp(left, op, right) => {
+                let left_val = self.eval(*left);
+                let right_val = self.eval(*right);
+                match op {
+                    Operator::Plus => left_val + right_val,
+                    _ => {
+                        // invalid operator, dump info and exit
+                        println!("{}Unimplemented operator: {}{:?}", Color::BrightRed, Color::Red, op);
+                        flush_styles();
+                        std::process::exit(0);
+                    },
+                }
+            }
+            Node::Ident(ident) => {
+                *self.env.get(&ident).unwrap_or_else(|| panic!("Undefined variable"))
+            },
+            Node::Print(node) => {
+                println!("{}", self.eval(*node));
+                0
+            }
+            Node::VarDecl(ident, typ) => {
+                let value = typ.map_or(0, |n| self.eval(*n));
+                self.env.insert(ident, value);
+                value
+            }
+            Node::EOF => 0,
+        }
+    }
 }
