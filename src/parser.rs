@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use better_term::{Color, flush_styles};
 use crate::lexer::{Operator, Token, TokenType};
 
@@ -10,6 +11,33 @@ pub enum Node {
     VarDecl(String, Option<Box<Node>>),
     Print(Box<Node>),
     EOF,
+}
+
+impl Node {
+    pub fn display(nodes: &Vec<Node>) {
+        for node in nodes {
+            println!("{}", node);
+        }
+    }
+}
+
+impl Display for Node {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Node::Literal(n) => write!(f, "LIT {}", n),
+            Node::BinOp(left, op, right) => write!(f, "EQ({} {} {})", left, op, right),
+            Node::Ident(ident) => write!(f, "IDENT '{}'", ident),
+            Node::VarDecl(ident, typ) => {
+                if let Some(typ) = typ {
+                    write!(f, "ASSIGN '{}' TO '{}'", ident, typ)
+                } else {
+                    write!(f, "ALLOCATE '{}'", ident)
+                }
+            }
+            Node::Print(node) => write!(f, "PRINT {}", node),
+            Node::EOF => write!(f, "EOF"),
+        }
+    }
 }
 
 // Parser

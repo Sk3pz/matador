@@ -1,6 +1,7 @@
 use std::time::Duration;
 use better_term::{Color, flush_styles};
 use crate::lexer::Lexer;
+use crate::parser::Node;
 
 mod parser;
 mod interpreter;
@@ -30,14 +31,14 @@ fn main() {
         lexer.lex()
     });
     println!("{}Lexed in {}{:?}", Color::BrightGreen, Color::BrightYellow, lex_time);
-    println!("{}Parsing tokens..", Color::Yellow);
+    println!("{}Parsing tokens..", Color::BrightYellow);
     flush_styles();
     let (nodes, parse_time) = timed(|| {
         let mut parser = parser::Parser::new(tokens);
         parser.parse()
     });
     println!("{}Parsed in {}{:?}", Color::BrightGreen, Color::BrightYellow, parse_time);
-    println!("{:?}", nodes);
+    Node::display(&nodes);
     println!("{}Interpreting nodes..", Color::BrightYellow);
     flush_styles();
     let (_, interpret_time) = timed(|| {

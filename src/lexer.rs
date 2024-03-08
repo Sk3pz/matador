@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 // Token types
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum TokenType {
@@ -26,6 +28,27 @@ pub enum Operator {
     Lte,   // <=
     LParen, // (
     RParen, // )
+}
+
+impl Display for Operator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let op = match self {
+            Operator::Plus => "+",
+            Operator::Minus => "-",
+            Operator::Mul => "*",
+            Operator::Div => "/",
+            Operator::Mod => "%",
+            Operator::Eq => "==",
+            Operator::Neq => "!=",
+            Operator::Gt => ">",
+            Operator::Lt => "<",
+            Operator::Gte => ">=",
+            Operator::Lte => "<=",
+            Operator::LParen => "(",
+            Operator::RParen => ")",
+        };
+        write!(f, "{}", op)
+    }
 }
 
 // Token struct
