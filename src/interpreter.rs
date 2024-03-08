@@ -212,10 +212,21 @@ impl Interpreter {
             }
             Node::Ident(ident) => {
                 // todo: proper error handling
-                self.env.get(&ident).unwrap_or_else(|| panic!("Undefined variable")).clone()
+                self.env.get(&ident).unwrap_or_else(|| {
+                    println!("{}Undefined variable: {}{}", Color::BrightRed, Color::Red, ident);
+                    flush_styles();
+                    std::process::exit(0);
+                }).clone()
             },
             Node::Print(node) => {
                 println!("{}", self.eval(*node));
+                Literal::Int(0)
+            }
+            Node::Drop(node) => {
+                // drop the variable if it is one
+                if let Node::Ident(ident) = *node {
+                    self.env.remove(&ident);
+                }
                 Literal::Int(0)
             }
             Node::VarDecl(ident, typ) => {

@@ -14,6 +14,7 @@ pub enum TokenType {
     In,
     Print,
     Assign,
+    Drop,
     Op(Operator),
 
     // block outlines
@@ -149,7 +150,7 @@ impl<'a> Lexer<'a> {
         let mut tokens = Vec::new();
         while self.pos < self.chars.len() {
             let token = self.next_token();
-            println!("{:?}", token);
+            //println!("{:?}", token);
             tokens.push(token);
         }
         tokens.push(Token {
@@ -205,7 +206,12 @@ impl<'a> Lexer<'a> {
             "break" => TokenType::Break,
             "continue" => TokenType::Continue,
             "in" => TokenType::In,
+            "drop" => TokenType::Drop,
             "print" => TokenType::Print,
+
+            // blocks
+            "{" => TokenType::LBrace,
+            "}" => TokenType::RBrace,
 
             // static type definitions
             "int" => TokenType::StaticType(StaticType::Int),
@@ -227,8 +233,6 @@ impl<'a> Lexer<'a> {
             ")" => TokenType::Op(Operator::RParen),
             "[" => TokenType::Op(Operator::LBracket),
             "]" => TokenType::Op(Operator::RBracket),
-            "{" => TokenType::LBrace,
-            "}" => TokenType::RBrace,
             "&" => TokenType::Op(Operator::And),
             "|" => TokenType::Op(Operator::Or),
             "^" => TokenType::Op(Operator::Xor),

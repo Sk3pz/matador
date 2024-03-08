@@ -19,6 +19,7 @@ pub enum Node {
     If(Box<Node>, Option<Box<Node>>, Option<Box<Node>>),
 
     Print(Box<Node>),
+    Drop(Box<Node>),
     EOF,
 }
 
@@ -66,6 +67,7 @@ impl Display for Node {
                 }
             }
             Node::Print(node) => write!(f, "PRINT {}", node),
+            Node::Drop(node) => write!(f, "DROP {}", node),
             Node::EOF => write!(f, "EOF"),
         }
     }
@@ -86,7 +88,7 @@ impl Parser {
         let mut nodes = Vec::new();
         while self.pos < self.tokens.len() {
             nodes.push(self.next());
-            println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
+            //println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
             flush_styles()
         }
         nodes
@@ -102,7 +104,6 @@ impl Parser {
                     nodes.push(Box::new(self.next()));
                 }
                 self.pos += 1;
-                println!("{}Block: {:?}", Color::BrightGreen, nodes);
                 Node::Block(nodes)
             }
 
@@ -119,6 +120,10 @@ impl Parser {
             TokenType::Print => {
                 let expr = self.next();
                 Node::Print(Box::new(expr))
+            }
+            TokenType::Drop => {
+                let expr = self.next();
+                Node::Drop(Box::new(expr))
             }
             TokenType::Ident(ident) => {
                 let ident = ident.clone();

@@ -35,6 +35,7 @@ x = 2
 y = x * y + result
 
 print y
+drop y // free y from memory to save ram
 print str
 
 // conditionals

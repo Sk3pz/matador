@@ -52,6 +52,8 @@ x = 2
 y = x * y + result
 
 print y
+// free y from memory as it is not used again
+drop y
 print str
 
 // conditionals
