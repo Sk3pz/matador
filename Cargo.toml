@@ -1,0 +1,9 @@
+[package]
+name = "matador"
+version = "0.1.0"
+edition = "2021"
+authors = ["Eric (Skepz) <skepz.dev@gmail.com>"]
+description = "The Matador programming language, designed for Chroma."
+
+[dependencies]
+better_term = "*"
