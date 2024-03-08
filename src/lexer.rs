@@ -112,7 +112,7 @@ impl<'a> Lexer<'a> {
         let mut tokens = Vec::new();
         while self.pos < self.chars.len() {
             let token = self.next_token();
-            println!("{:?}", token);
+            //println!("{:?}", token);
             tokens.push(token);
         }
         tokens.push(Token {
@@ -195,7 +195,6 @@ impl<'a> Lexer<'a> {
                 TokenType::Bool(builder == "true")
             }
             _ if builder.starts_with('"') => { // string literals
-                println!("found string literal");
                 builder = String::from(&builder[1..]);
                 while self.pos < self.chars.len() && self.chars[self.pos] != '"' {
                     builder.push(self.chars[self.pos]);

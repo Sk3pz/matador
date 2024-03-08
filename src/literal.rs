@@ -14,7 +14,8 @@ impl Literal {
         match (self, other) {
             (Literal::Int(a), Literal::Int(b)) => Some(Literal::Int(a + b)),
             (Literal::Float(a), Literal::Float(b)) => Some(Literal::Float(a + b)),
-            (Literal::String(a), Literal::String(b)) => Some(Literal::String(format!("{}{}", a, b))),
+            (Literal::String(a), b) => Some(Literal::String(format!("{}{}", a, b))), // can append anything to a string
+            (a, Literal::String(b)) => Some(Literal::String(format!("{}{}", a, b))),
             _ => None,
         }
     }

@@ -112,7 +112,7 @@ impl Parser {
             let rhs = self.term();
             Node::BinOp(Box::new(lhs), op, Box::new(rhs))
         } else {
-            lhs
+             lhs
         }
     }
 
@@ -199,6 +199,18 @@ impl Parser {
             TokenType::Int(n) => {
                 self.pos += 1;
                 Node::Literal(Literal::Int(*n))
+            }
+            TokenType::String(s) => {
+                self.pos += 1;
+                Node::Literal(Literal::String(s.clone()))
+            }
+            TokenType::Float(n) => {
+                self.pos += 1;
+                Node::Literal(Literal::Float(*n))
+            }
+            TokenType::Bool(b) => {
+                self.pos += 1;
+                Node::Literal(Literal::Bool(*b))
             }
             TokenType::Ident(ident) => {
                 self.pos += 1;
