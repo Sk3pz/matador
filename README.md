@@ -22,4 +22,11 @@ print result
 x = 2
 print x * y
 ```
-(prints 15 and 20 respectively)
+(prints 15 and 20 respectively)  
+  
+Todo:
+- [x] basic arithmetic
+- [ ] types
+- [ ] functions
+- [ ] loops
+- [ ] conditionals
