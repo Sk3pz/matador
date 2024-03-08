@@ -73,6 +73,15 @@ impl Interpreter {
                         };
                         lit
                     },
+                    Operator::Pow => {
+                        let Some(lit) = left_val.pow(&right_val) else {
+                            println!("{}Invalid operation: {}{:?} + {:?}",
+                                     Color::BrightRed, Color::Red, left_val, right_val);
+                            flush_styles();
+                            std::process::exit(0);
+                        };
+                        lit
+                    },
                     _ => {
                         // invalid operator, dump info and exit
                         println!("{}Unimplemented operator: {}{:?}", Color::BrightRed, Color::Red, op);

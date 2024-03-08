@@ -52,6 +52,14 @@ impl Literal {
         }
     }
 
+    pub fn pow(&self, other: &Literal) -> Option<Literal> {
+        match (self, other) {
+            (Literal::Int(a), Literal::Int(b)) => Some(Literal::Int(a.pow(*b as u32))),
+            (Literal::Float(a), Literal::Float(b)) => Some(Literal::Float(a.powf(*b))),
+            _ => None,
+        }
+    }
+
     pub fn eq(&self, other: &Literal) -> Option<Literal> {
         match (self, other) {
             (Literal::Int(a), Literal::Int(b)) => Some(Literal::Bool(a == b)),

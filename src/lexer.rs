@@ -9,6 +9,9 @@ pub enum TokenType {
     Else,
     While,
     For,
+    Break,
+    Continue,
+    In,
     Print,
     Assign,
     Op(Operator),
@@ -54,6 +57,7 @@ pub enum Operator {
     Mul,    // *
     Div,    // /
     Mod,    // %
+    Pow,    // **
     Eq,     // ==
     Neq,    // !=
     Gt,     // >
@@ -63,6 +67,7 @@ pub enum Operator {
     LParen, // (
     RParen, // )
     Dec,    // .
+    Range,  // ..
 }
 
 impl Display for Operator {
@@ -73,6 +78,7 @@ impl Display for Operator {
             Operator::Mul => "*",
             Operator::Div => "/",
             Operator::Mod => "%",
+            Operator::Pow => "**",
             Operator::Eq => "==",
             Operator::Neq => "!=",
             Operator::Gt => ">",
@@ -82,6 +88,7 @@ impl Display for Operator {
             Operator::LParen => "(",
             Operator::RParen => ")",
             Operator::Dec => ".",
+            Operator::Range => "..",
         };
         write!(f, "{}", op)
     }
@@ -165,6 +172,9 @@ impl<'a> Lexer<'a> {
             "else" => TokenType::Else,
             "while" => TokenType::While,
             "for" => TokenType::For,
+            "break" => TokenType::Break,
+            "continue" => TokenType::Continue,
+            "in" => TokenType::In,
             "print" => TokenType::Print,
 
             // static type definitions
@@ -180,6 +190,7 @@ impl<'a> Lexer<'a> {
             "*" => TokenType::Op(Operator::Mul),
             "/" => TokenType::Op(Operator::Div),
             "%" => TokenType::Op(Operator::Mod),
+            "**" => TokenType::Op(Operator::Pow),
             "==" => TokenType::Op(Operator::Eq),
             "!=" => TokenType::Op(Operator::Neq),
             ">" => TokenType::Op(Operator::Gt),
