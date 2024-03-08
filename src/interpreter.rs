@@ -30,6 +30,10 @@ impl Interpreter {
                 let right_val = self.eval(*right);
                 match op {
                     Operator::Plus => left_val + right_val,
+                    Operator::Minus => left_val - right_val,
+                    Operator::Mul => left_val * right_val,
+                    Operator::Div => left_val / right_val,
+                    Operator::Mod => left_val % right_val,
                     _ => {
                         // invalid operator, dump info and exit
                         println!("{}Unimplemented operator: {}{:?}", Color::BrightRed, Color::Red, op);
