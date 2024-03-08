@@ -1,11 +1,14 @@
 use std::fmt::Display;
 use better_term::{Color, flush_styles};
 use crate::lexer::{Operator, Token, TokenType};
+use crate::literal::Literal;
 
 // AST Nodes
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Node {
-    Literal(i64),
+    // literals
+    Literal(Literal),
+
     BinOp(Box<Node>, Operator, Box<Node>),
     Ident(String),
     VarDecl(String, Option<Box<Node>>),
@@ -88,7 +91,10 @@ impl Parser {
                     _ => self.expression_stmt(Node::Ident(ident))
                 }
             },
-            TokenType::Number(n) => self.expression_stmt(Node::Literal(*n)),
+            TokenType::Int(n) => self.expression_stmt(Node::Literal(Literal::Int(*n))),
+            TokenType::Float(n) => self.expression_stmt(Node::Literal(Literal::Float(*n))),
+            TokenType::String(s) => self.expression_stmt(Node::Literal(Literal::String(s.clone()))),
+            TokenType::Bool(b) => self.expression_stmt(Node::Literal(Literal::Bool(*b))),
             TokenType::EOF => Node::EOF,
             _ => {
                 // invalid token, dump info and exit
@@ -178,7 +184,7 @@ impl Parser {
                 Operator::Minus => {
                     self.pos += 1;
                     let rhs = self.unary();
-                    Node::BinOp(Box::new(Node::Literal(0)), Operator::Minus, Box::new(rhs))
+                    Node::BinOp(Box::new(Node::Literal(Literal::Int(0))), Operator::Minus, Box::new(rhs))
                 }
                 _ => self.primary(),
             }
@@ -190,9 +196,9 @@ impl Parser {
     fn primary(&mut self) -> Node {
         let token = &self.tokens[self.pos];
         match &token.token_type {
-            TokenType::Number(n) => {
+            TokenType::Int(n) => {
                 self.pos += 1;
-                Node::Literal(*n)
+                Node::Literal(Literal::Int(*n))
             }
             TokenType::Ident(ident) => {
                 self.pos += 1;

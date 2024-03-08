@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use better_term::{Color, flush_styles};
 use crate::lexer::Operator;
+use crate::literal::Literal;
 use crate::parser::Node;
 
-// Interpreter
 pub struct Interpreter {
-    env: HashMap<String, i64>,
+    env: HashMap<String, Literal>,
 }
 
 impl Interpreter {
@@ -21,19 +21,58 @@ impl Interpreter {
         }
     }
 
-    // todo: this assumes variables are only integers, no other types are supported
-    fn eval(&mut self, node: Node) -> i64 {
+    fn eval(&mut self, node: Node) -> Literal {
         match node {
             Node::Literal(n) => n,
             Node::BinOp(left, op, right) => {
                 let left_val = self.eval(*left);
                 let right_val = self.eval(*right);
                 match op {
-                    Operator::Plus => left_val + right_val,
-                    Operator::Minus => left_val - right_val,
-                    Operator::Mul => left_val * right_val,
-                    Operator::Div => left_val / right_val,
-                    Operator::Mod => left_val % right_val,
+                    Operator::Plus => {
+                        let Some(lit) = left_val.add(&right_val) else {
+                            println!("{}Invalid operation: {}{:?} + {:?}",
+                                Color::BrightRed, Color::Red, left_val, right_val);
+                            flush_styles();
+                            std::process::exit(0);
+                        };
+                        lit
+                    },
+                    Operator::Minus => {
+                        let Some(lit) = left_val.sub(&right_val) else {
+                            println!("{}Invalid operation: {}{:?} + {:?}",
+                                     Color::BrightRed, Color::Red, left_val, right_val);
+                            flush_styles();
+                            std::process::exit(0);
+                        };
+                        lit
+                    },
+                    Operator::Mul => {
+                        let Some(lit) = left_val.mul(&right_val) else {
+                            println!("{}Invalid operation: {}{:?} + {:?}",
+                                     Color::BrightRed, Color::Red, left_val, right_val);
+                            flush_styles();
+                            std::process::exit(0);
+                        };
+                        lit
+                    },
+                    Operator::Div => {
+                        let Some(lit) = left_val.div(&right_val) else {
+                            println!("{}Invalid operation: {}{:?} + {:?}",
+                                     Color::BrightRed, Color::Red, left_val, right_val);
+                            flush_styles();
+                            std::process::exit(0);
+                        };
+                        lit
+                    },
+                    Operator::Mod => {
+                        let Some(lit) = left_val.rem(&right_val) else {
+                            println!("{}Invalid operation: {}{:?} + {:?}",
+                                     Color::BrightRed, Color::Red, left_val, right_val);
+                            flush_styles();
+                            std::process::exit(0);
+                        };
+                        lit
+                    },
                     _ => {
                         // invalid operator, dump info and exit
                         println!("{}Unimplemented operator: {}{:?}", Color::BrightRed, Color::Red, op);
@@ -44,18 +83,18 @@ impl Interpreter {
             }
             Node::Ident(ident) => {
                 // todo: proper error handling
-                *self.env.get(&ident).unwrap_or_else(|| panic!("Undefined variable"))
+                self.env.get(&ident).unwrap_or_else(|| panic!("Undefined variable")).clone()
             },
             Node::Print(node) => {
                 println!("{}", self.eval(*node));
-                0
+                Literal::Int(0)
             }
             Node::VarDecl(ident, typ) => {
-                let value = typ.map_or(0, |n| self.eval(*n));
-                self.env.insert(ident, value);
+                let value = typ.map_or(Literal::Int(0), |n| self.eval(*n));
+                self.env.insert(ident, value.clone());
                 value
             }
-            Node::EOF => 0,
+            Node::EOF => Literal::Int(0),
         }
     }
 }

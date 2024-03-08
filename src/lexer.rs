@@ -1,33 +1,68 @@
 use std::fmt::Display;
 
-// Token types
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
+    // language keywords
     Let,
+    Fn,
+    If,
+    Else,
+    While,
+    For,
     Print,
-    Ident(String),
-    Int,
     Assign,
-    Number(i64),
     Op(Operator),
+
+    // identifiers
+    Ident(String),
+
+    // types
+    StaticType(StaticType),
+    Int(i64),
+    Float(f64),
+    Bool(bool),
+    String(String),
+
     EOF,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+pub enum StaticType {
+    Int,
+    Float,
+    String,
+    Bool,
+}
+
+impl Display for StaticType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let typ = match self {
+            StaticType::Int => "int",
+            StaticType::Float => "float",
+            StaticType::String => "string",
+            StaticType::Bool => "bool",
+        };
+        write!(f, "{}", typ)
+    }
+
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Operator {
-    Plus,  // +
-    Minus, // -
-    Mul,   // *
-    Div,   // /
-    Mod,   // %
-    Eq,    // ==
-    Neq,   // !=
-    Gt,    // >
-    Lt,    // <
-    Gte,   // >=
-    Lte,   // <=
+    Plus,   // +
+    Minus,  // -
+    Mul,    // *
+    Div,    // /
+    Mod,    // %
+    Eq,     // ==
+    Neq,    // !=
+    Gt,     // >
+    Lt,     // <
+    Gte,    // >=
+    Lte,    // <=
     LParen, // (
     RParen, // )
+    Dec,    // .
 }
 
 impl Display for Operator {
@@ -46,19 +81,18 @@ impl Display for Operator {
             Operator::Lte => "<=",
             Operator::LParen => "(",
             Operator::RParen => ")",
+            Operator::Dec => ".",
         };
         write!(f, "{}", op)
     }
 }
 
-// Token struct
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Token {
     pub(crate) token_type: TokenType,
     lexeme: String,
 }
 
-// Lexer
 pub struct Lexer<'a> {
     source: &'a str,
     chars: Vec<char>,
@@ -78,6 +112,7 @@ impl<'a> Lexer<'a> {
         let mut tokens = Vec::new();
         while self.pos < self.chars.len() {
             let token = self.next_token();
+            println!("{:?}", token);
             tokens.push(token);
         }
         tokens.push(Token {
@@ -96,19 +131,49 @@ impl<'a> Lexer<'a> {
             if c.is_whitespace() {
                 break;
             }
+            // skip comments
+            if c == '/' {
+                if self.pos + 1 < self.chars.len() && self.chars[self.pos + 1] == '/' {
+                    while self.pos < self.chars.len() && self.chars[self.pos] != '\n' {
+                        self.pos += 1;
+                    }
+                    continue;
+                } else if self.pos + 1 < self.chars.len() && self.chars[self.pos + 1] == '*' {
+                    self.pos += 2;
+                    while self.pos < self.chars.len() {
+                        if self.chars[self.pos] == '*' && self.pos + 1 < self.chars.len() && self.chars[self.pos + 1] == '/' {
+                            self.pos += 2;
+                            break;
+                        }
+                        self.pos += 1;
+                    }
+                    continue;
+                }
+            }
             builder.push(c);
             self.pos += 1;
         }
         if builder.is_empty() {
-            return Token {
-                token_type: TokenType::EOF,
-                lexeme: "".to_string(),
-            };
+            // handle cases where it exits the loop without adding anything to the builder
+            return self.next_token();
         }
         let token_type = match &builder[..] {
+            // language keywords
             "let" => TokenType::Let,
+            "fn" => TokenType::Fn,
+            "if" => TokenType::If,
+            "else" => TokenType::Else,
+            "while" => TokenType::While,
+            "for" => TokenType::For,
             "print" => TokenType::Print,
-            "int" => TokenType::Int,
+
+            // static type definitions
+            "int" => TokenType::StaticType(StaticType::Int),
+            "float" => TokenType::StaticType(StaticType::Float),
+            "string" => TokenType::StaticType(StaticType::String),
+            "bool" => TokenType::StaticType(StaticType::Int),
+
+            // operators
             "=" => TokenType::Assign,
             "+" => TokenType::Op(Operator::Plus),
             "-" => TokenType::Op(Operator::Minus),
@@ -121,7 +186,33 @@ impl<'a> Lexer<'a> {
             "<" => TokenType::Op(Operator::Lt),
             ">=" => TokenType::Op(Operator::Gte),
             "<=" => TokenType::Op(Operator::Lte),
-            _ if builder.chars().all(|c| c.is_digit(10)) => TokenType::Number(builder.parse().unwrap()),
+            "(" => TokenType::Op(Operator::LParen),
+            ")" => TokenType::Op(Operator::RParen),
+            "." => TokenType::Op(Operator::Dec),
+
+            // literals
+            "true" | "false" => {
+                TokenType::Bool(builder == "true")
+            }
+            _ if builder.starts_with('"') => { // string literals
+                println!("found string literal");
+                builder = String::from(&builder[1..]);
+                while self.pos < self.chars.len() && self.chars[self.pos] != '"' {
+                    builder.push(self.chars[self.pos]);
+                    self.pos += 1;
+                }
+                self.pos += 1;
+                TokenType::String(builder.clone())
+            },
+            _ if builder.chars().all(|c| c.is_digit(10) || c == '.' || c == '-') => {
+                if builder.contains('.') {
+                    TokenType::Float(builder.parse().unwrap())
+                } else {
+                    TokenType::Int(builder.parse().unwrap())
+                }
+            },
+
+            // identifiers
             _ => TokenType::Ident(builder.clone()),
         };
 

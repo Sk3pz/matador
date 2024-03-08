@@ -6,15 +6,9 @@ use crate::parser::Node;
 mod parser;
 mod interpreter;
 mod lexer;
+mod literal;
 
-const TEST_CODE: &str = "\
-let x = 5\n\
-let y = 10\n\
-let result = x + y\n\
-print result\n\
-x = 2\n\
-print x * y\n\
-";
+const TEST_CODE: &str = include_str!("../matador_tests/matador_test.mtdr");
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {
     let start = std::time::Instant::now();
