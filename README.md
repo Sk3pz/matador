@@ -32,34 +32,34 @@ let b = true
 
 let result = x + y // addition
 
-// printing
-print result
+// printlning
+println result
 
 // reassignment
 x = 2
 y = x * y + result
 
-print y
+println y
 // free y from memory as it is not used again
 drop y
-print str
+println str
 
 // conditionals
 if true {
-    print "This is true"
+    println "This is true"
 } else {
-    print "This is false"
+    println "This is false"
 }
 
 if x == 2 {
-   print "x is 2"
+   println "x is 2"
 } else if x == 3 {
-   print "x is 3"
+   println "x is 3"
 } else {
-   print "x is not 2 or 3"
+   println "x is not 2 or 3"
 }
 
-print "This is Matador (" + b + ")! 🐂"
+println "This is Matador (" + b + ")! 🐂"
 ```
 ### Output:
 ```
@@ -90,8 +90,12 @@ Todo:
 - [x] conditionals (if/else)
 - [x] input
 - [ ] static type checking and declaration
+- [ ] type casting
+- [ ] type checking
+- [ ] error system
 - [ ] loops
 - [ ] functions
+  - [ ] replace built in keywords like readln and print with functions
 - [ ] arrays
 - [ ] maps
 - [ ] structs

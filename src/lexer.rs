@@ -13,15 +13,20 @@ pub enum TokenType {
     Break,
     Continue,
     In,
+    As,
+    Is,
+    Assign,
+    Op(Operator),
+
+    // todo: these should become functions in the future
+    // functions
     Print,
     Println,
     ReadStr,
     ReadInt,
     ReadFloat,
     ReadBool,
-    Assign,
     Drop,
-    Op(Operator),
 
     // block outlines
     // not in operators as they are not used in the same way
@@ -38,7 +43,6 @@ pub enum TokenType {
     Bool(bool),
     String(String),
 
-    Newline,
     EOF,
 }
 
@@ -172,13 +176,21 @@ impl<'a> Lexer<'a> {
             "break" => TokenType::Break,
             "continue" => TokenType::Continue,
             "in" => TokenType::In,
-            "drop" => TokenType::Drop,
+            "as" => TokenType::As,
+            "is" => TokenType::Is,
+            "int" => TokenType::StaticType(StaticType::Int),
+            "float" => TokenType::StaticType(StaticType::Float),
+            "string" => TokenType::StaticType(StaticType::String),
+            "bool" => TokenType::StaticType(StaticType::Bool),
+
+            // functions
             "readstr" | "readln" => TokenType::ReadStr,
             "readint" => TokenType::ReadInt,
             "readfloat" => TokenType::ReadFloat,
             "readbool" => TokenType::ReadBool,
             "print" => TokenType::Print,
             "println" => TokenType::Println,
+            "drop" => TokenType::Drop,
 
             // blocks
             "{" => TokenType::LBrace,
@@ -226,9 +238,6 @@ impl<'a> Lexer<'a> {
                 TokenType::Bool(builder == "true")
             }
 
-            // newlines
-            "\n" => TokenType::Newline,
-
             _ if builder.starts_with('"') => { // string literals
                 builder = String::from(&builder[1..]);
                 if builder.ends_with('"') {
@@ -263,12 +272,7 @@ impl<'a> Lexer<'a> {
 
     fn skip_whitespace(&mut self) {
         while self.pos < self.chars.len() && self.chars[self.pos].is_whitespace() {
-            let next = self.chars[self.pos];
-            if next != '\n' && next.is_whitespace() {
-                self.pos += 1;
-            } else {
-                break;
-            }
+            self.pos += 1;
         }
     }
 }

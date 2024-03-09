@@ -34,18 +34,6 @@ impl ShuntedStack {
     pub(crate) fn push(&mut self, item: ShuntedStackItem) {
         self.items.push(item);
     }
-
-    pub(crate) fn peek_at(&self, index: usize) -> Option<&ShuntedStackItem> {
-        self.items.get(index)
-    }
-
-    pub(crate) fn replace(&mut self, index: usize, item: ShuntedStackItem) {
-        self.items[index] = item;
-    }
-
-    pub(crate) fn len(&self) -> usize {
-        self.items.len()
-    }
 }
 
 impl Iterator for ShuntedStack {

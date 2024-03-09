@@ -16,7 +16,6 @@ pub enum Node {
     Block(Vec<Node>),
 
     // operations
-    BinOp(Box<Node>, Operator, Box<Node>),
     ShuntedStack(ShuntedStack),
     VarDecl(String, Option<Box<Node>>),
     If(Box<Node>, Option<Box<Node>>, Option<Box<Node>>),
@@ -47,7 +46,6 @@ impl Display for Node {
             Node::Negative => write!(f, "NEG"),
             Node::Expression => write!(f, "EXPR"),
             Node::ShuntedStack(stack) => write!(f, "STACK({:?})", stack),
-            Node::BinOp(left, op, right) => write!(f, "EQ({} {} {})", left, op, right),
             Node::Block(nodes) => {
                 write!(f, "BLOCK{{")?;
                 for node in nodes {
@@ -100,7 +98,7 @@ impl Parser {
         let mut nodes = Vec::new();
         while self.pos < self.tokens.len() {
             nodes.push(self.next());
-            //println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
+            println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
             flush_styles()
         }
         nodes
@@ -195,7 +193,7 @@ impl Parser {
             TokenType::String(s) => self.shunting_yard(Node::Literal(Literal::String(s.clone()))),
             TokenType::Bool(b) => self.shunting_yard(Node::Literal(Literal::Bool(*b))),
 
-            TokenType::Newline => self.next(),
+            //TokenType::Newline => self.next(),
             TokenType::EOF => Node::EOF,
             _ => {
                 // invalid token, dump info and exit
@@ -220,6 +218,7 @@ impl Parser {
         }
     }
 
+    // todo: trailing ++ or -- can cause issues
     fn shunting_yard(&mut self, lhs: Node) -> Node {
         let mut postfix = ShuntedStack::new();
         let mut op_stack = Vec::new();
@@ -231,6 +230,7 @@ impl Parser {
         match lhs {
             Node::Literal(_) | Node::Ident(_) => {
                 postfix.push(ShuntedStackItem::Operand(lhs));
+                last_was_lit = true;
             }
             Node::Negative => {
                 negative = true;
@@ -322,32 +322,35 @@ impl Parser {
                     }
                 }
                 TokenType::Int(n) => {
+                    if last_was_lit { break; }
                     postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Int(*n))));
                     last_op = None;
                     last_was_lit = true;
                 }
                 TokenType::Float(n) => {
+                    if last_was_lit { break; }
                     postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Float(*n))));
                     last_op = None;
                     last_was_lit = true;
                 }
                 TokenType::Ident(ident) => {
+                    if last_was_lit { break; }
                     postfix.push(ShuntedStackItem::Operand(Node::Ident(ident.clone())));
                     last_op = None;
                     last_was_lit = true;
                 }
                 TokenType::Bool(b) => {
+                    if last_was_lit { break; }
                     postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Bool(*b))));
                     last_op = None;
                     last_was_lit = true;
                 }
                 TokenType::String(s) => {
+                    if last_was_lit { break; }
                     postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::String(s.clone()))));
                     last_op = None;
                     last_was_lit = true;
                 }
-                // exit the loop (not needed, but good to explicitly state the usage of newlines)
-                TokenType::Newline => break,
                 _ => break, // exit the loop
             }
             self.pos += 1;

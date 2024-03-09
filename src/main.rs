@@ -1,7 +1,7 @@
 use std::time::Duration;
 use better_term::{Color, flush_styles};
 use crate::lexer::Lexer;
-//use crate::parser::Node;
+use crate::parser::Node;
 
 mod parser;
 mod interpreter;
@@ -10,7 +10,7 @@ mod literal;
 mod postfix;
 mod operator;
 
-const TEST_CODE: &str = include_str!("../matador_tests/calculator.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/math_test.mtdr");
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {
     let start = std::time::Instant::now();
