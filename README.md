@@ -89,14 +89,15 @@ Todo:
 - [x] printing
 - [x] conditionals (if/else)
 - [x] input
-- [ ] static type checking and declaration
 - [ ] type casting
 - [ ] type checking
-- [ ] error system
+- [ ] error type
 - [ ] loops
 - [ ] functions
   - [ ] replace built in keywords like readln and print with functions
 - [ ] arrays
 - [ ] maps
 - [ ] structs
+- [ ] multi-file support
+- [ ] loading and running other matador programs
 - [ ] expose API for creating libraries

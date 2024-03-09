@@ -18,6 +18,8 @@ pub enum Node {
     // operations
     ShuntedStack(ShuntedStack),
     VarDecl(String, Option<Box<Node>>),
+    TypeCast(Box<Node>, StaticType),
+    TypeCheck(Box<Node>, StaticType),
     If(Box<Node>, Option<Box<Node>>, Option<Box<Node>>),
 
     // arithmetic
@@ -75,6 +77,8 @@ impl Display for Node {
                     write!(f, "ALLOCATE '{}'", ident)
                 }
             }
+            Node::TypeCast(node, typ) => write!(f, "CAST {} TO {}", node, typ),
+            Node::TypeCheck(node, typ) => write!(f, "CHECK {} IS {}", node, typ),
             Node::Read(typ) => write!(f, "READ {}", typ),
             Node::Print(node, newline) => write!(f, "PRINT {}{}", node, if *newline { "LN" } else { "" }),
             Node::Drop(node) => write!(f, "DROP {}", node),
@@ -98,7 +102,7 @@ impl Parser {
         let mut nodes = Vec::new();
         while self.pos < self.tokens.len() {
             nodes.push(self.next());
-            println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
+            //println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
             flush_styles()
         }
         nodes
@@ -112,7 +116,6 @@ impl Parser {
                 let mut nodes = Vec::new();
                 while self.peek().token_type != TokenType::RBrace {
                     nodes.push(self.next());
-                    self.pos += 1;
                 }
                 self.pos += 1;
                 Node::Block(nodes)
@@ -159,6 +162,36 @@ impl Parser {
                         self.pos += 1;
                         let expr = self.next();
                         Node::VarDecl(ident, Some(Box::new(expr)))
+                    }
+                    TokenType::As => {
+                        self.pos += 1;
+                        match self.peek().clone().token_type {
+                            TokenType::StaticType(typ) => {
+                                self.pos += 1;
+                                Node::TypeCast(Box::new(Node::Ident(ident)), typ.clone())
+                            }
+                            _ => {
+                                // invalid token, dump info and exit
+                                println!("{}Invalid token (as): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                                flush_styles();
+                                std::process::exit(0);
+                            }
+                        }
+                    }
+                    TokenType::Is => {
+                        self.pos += 1;
+                        match self.peek().clone().token_type {
+                            TokenType::StaticType(typ) => {
+                                self.pos += 1;
+                                Node::TypeCheck(Box::new(Node::Ident(ident)), typ.clone())
+                            }
+                            _ => {
+                                // invalid token, dump info and exit
+                                println!("{}Invalid token (is): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                                flush_styles();
+                                std::process::exit(0);
+                            }
+                        }
                     }
                     _ => self.shunting_yard(Node::Ident(ident))
                 }
@@ -322,31 +355,41 @@ impl Parser {
                     }
                 }
                 TokenType::Int(n) => {
-                    if last_was_lit { break; }
+                    if last_was_lit {
+                        break;
+                    }
                     postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Int(*n))));
                     last_op = None;
                     last_was_lit = true;
                 }
                 TokenType::Float(n) => {
-                    if last_was_lit { break; }
+                    if last_was_lit {
+                        break;
+                    }
                     postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Float(*n))));
                     last_op = None;
                     last_was_lit = true;
                 }
                 TokenType::Ident(ident) => {
-                    if last_was_lit { break; }
+                    if last_was_lit {
+                        break;
+                    }
                     postfix.push(ShuntedStackItem::Operand(Node::Ident(ident.clone())));
                     last_op = None;
                     last_was_lit = true;
                 }
                 TokenType::Bool(b) => {
-                    if last_was_lit { break; }
+                    if last_was_lit {
+                        break;
+                    }
                     postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Bool(*b))));
                     last_op = None;
                     last_was_lit = true;
                 }
                 TokenType::String(s) => {
-                    if last_was_lit { break; }
+                    if last_was_lit {
+                        break;
+                    }
                     postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::String(s.clone()))));
                     last_op = None;
                     last_was_lit = true;

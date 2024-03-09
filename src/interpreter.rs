@@ -16,6 +16,18 @@ impl Interpreter {
         }
     }
 
+    fn get_var(&self, ident: &str) -> &Literal {
+        self.env.get(ident).unwrap_or_else(|| {
+            println!("{}Undefined variable: {}{}", Color::BrightRed, Color::Red, ident);
+            flush_styles();
+            std::process::exit(0);
+        })
+    }
+
+    fn set_var(&mut self, ident: &str, value: Literal) {
+        self.env.insert(ident.to_string(), value);
+    }
+
     pub fn interpret(&mut self, nodes: Vec<Node>) {
         for node in nodes {
             self.eval(node);
@@ -94,12 +106,7 @@ impl Interpreter {
                 operand_stack.pop().unwrap()
             }
             Node::Ident(ident) => {
-                // todo: proper error handling
-                self.env.get(&ident).unwrap_or_else(|| {
-                    println!("{}Undefined variable: {}{}", Color::BrightRed, Color::Red, ident);
-                    flush_styles();
-                    std::process::exit(0);
-                }).clone()
+                self.get_var(&ident).clone()
             },
             Node::Print(node, newline) => {
                 print!("{}{}", self.eval(*node), if newline { "\n" } else { "" });
@@ -145,6 +152,53 @@ impl Interpreter {
                 let value = typ.map_or(Literal::Int(0), |n| self.eval(*n));
                 self.env.insert(ident, value.clone());
                 value
+            }
+            Node::TypeCast(ident, typ) => {
+                match *ident {
+                    Node::Ident(s) => {
+                        // change the type of the variable
+                        let value = self.get_var(&s);
+                        // cast the value to the new type
+                        match typ {
+                            StaticType::Int => {
+                                // cast the value to an int
+                                value.to_int()
+                            }
+                            StaticType::Float => {
+                                // cast the value to a float
+                                value.to_float()
+                            }
+                            StaticType::String => {
+                                // cast the value to a string
+                                value.to_string()
+                            }
+                            StaticType::Bool => {
+                                value.to_bool()
+                            }
+                        }
+                    }
+                    _ => {
+                        println!("{}Invalid type cast: {}{:?}", Color::BrightRed, Color::Red, ident);
+                        flush_styles();
+                        std::process::exit(0);
+                    }
+                }
+            }
+            Node::TypeCheck(ident, typ) => {
+                match *ident {
+                    Node::Ident(s) => {
+                        // check the type of the variable
+                        let value = self.get_var(&s);
+                        // check if the value is of the correct type
+
+                        todo!()
+                    }
+                    _ => {
+                        println!("{}Invalid type check: {}{:?}", Color::BrightRed, Color::Red, ident);
+                        flush_styles();
+                        std::process::exit(0);
+                    }
+                }
             }
             Node::If(cond, then, els) => {
                 // evaluate condition

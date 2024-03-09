@@ -10,7 +10,7 @@ mod literal;
 mod postfix;
 mod operator;
 
-const TEST_CODE: &str = include_str!("../matador_tests/math_test.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/full_test.mtdr");
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {
     let start = std::time::Instant::now();

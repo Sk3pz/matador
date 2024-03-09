@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use better_term::{Color, flush_styles};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Literal {
@@ -175,6 +176,50 @@ impl Literal {
             Literal::Int(a) => Some(Literal::Int(-*a)),
             Literal::Float(a) => Some(Literal::Float(-*a)),
             _ => None,
+        }
+    }
+
+    pub fn to_int(&self) -> Literal {
+        match self {
+            Literal::Int(a) => Literal::Int(*a),
+            Literal::Float(a) => Literal::Int(*a as i64),
+            Literal::String(a) => Literal::Int(a.parse().unwrap_or_else(|_| {
+                println!("{}Invalid input: {}{}", Color::BrightRed, Color::Red, a);
+                flush_styles();
+                std::process::exit(0);
+            })),
+            Literal::Bool(a) => Literal::Int(*a as i64),
+        }
+    }
+
+    pub fn to_float(&self) -> Literal {
+        match self {
+            Literal::Int(a) => Literal::Float(*a as f64),
+            Literal::Float(a) => Literal::Float(*a),
+            Literal::String(a) => Literal::Float(a.parse().unwrap_or_else(|_| {
+                println!("{}Invalid input: {}{}", Color::BrightRed, Color::Red, a);
+                flush_styles();
+                std::process::exit(0);
+            })),
+            Literal::Bool(a) => Literal::Float(*a as i64 as f64),
+        }
+    }
+
+    pub fn to_string(&self) -> Literal {
+        match self {
+            Literal::Int(a) => Literal::String(a.to_string()),
+            Literal::Float(a) => Literal::String(a.to_string()),
+            Literal::String(a) => Literal::String(a.clone()),
+            Literal::Bool(a) => Literal::String(a.to_string()),
+        }
+    }
+
+    pub fn to_bool(&self) -> Literal {
+        match self {
+            Literal::Int(a) => Literal::Bool(*a != 0),
+            Literal::Float(a) => Literal::Bool(*a != 0.0),
+            Literal::String(a) => Literal::Bool(!a.is_empty()),
+            Literal::Bool(a) => Literal::Bool(*a),
         }
     }
 }

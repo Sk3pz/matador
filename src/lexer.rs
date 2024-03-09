@@ -134,7 +134,7 @@ impl<'a> Lexer<'a> {
                 }
             }
             // handle ending tokens
-            if c == ')' || c == '}' || c == ']' || c == ',' || c == '\n' {
+            if c == ')' || c == '}' || c == ']' || c == ',' {
                 if !builder.is_empty() {
                     break;
                 }
@@ -144,7 +144,7 @@ impl<'a> Lexer<'a> {
             }
             // handle leading single character tokens
             // todo: this probably wont allow x =1, and would treat =1 as an identifier
-            if c == '(' || c == '{' || c == '[' || c == '!' || c == '\n' {
+            if c == '(' || c == '{' || c == '[' || c == '!' {
                 builder.push(c);
                 self.pos += 1;
                 break;
@@ -195,12 +195,6 @@ impl<'a> Lexer<'a> {
             // blocks
             "{" => TokenType::LBrace,
             "}" => TokenType::RBrace,
-
-            // static type definitions
-            "int" => TokenType::StaticType(StaticType::Int),
-            "float" => TokenType::StaticType(StaticType::Float),
-            "string" => TokenType::StaticType(StaticType::String),
-            "bool" => TokenType::StaticType(StaticType::Int),
 
             // operators
             "(" => TokenType::Op(Operator::LParen),
