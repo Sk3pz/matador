@@ -1,0 +1,21 @@
+
+let x = 1
+
+if x is int {
+    println "x is an integer"
+} else {
+    println "x is not an integer"
+}
+
+let y = x as bool
+println y
+
+
+
+
+
+
+
+
+
+

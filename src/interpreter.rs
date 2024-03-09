@@ -190,8 +190,36 @@ impl Interpreter {
                         // check the type of the variable
                         let value = self.get_var(&s);
                         // check if the value is of the correct type
-
-                        todo!()
+                        match *value {
+                            Literal::Int(_) => {
+                                if typ == StaticType::Int {
+                                    Literal::Bool(true)
+                                } else {
+                                    Literal::Bool(false)
+                                }
+                            }
+                            Literal::Float(_) => {
+                                if typ == StaticType::Float {
+                                    Literal::Bool(true)
+                                } else {
+                                    Literal::Bool(false)
+                                }
+                            }
+                            Literal::String(_) => {
+                                if typ == StaticType::String {
+                                    Literal::Bool(true)
+                                } else {
+                                    Literal::Bool(false)
+                                }
+                            }
+                            Literal::Bool(_) => {
+                                if typ == StaticType::Bool {
+                                    Literal::Bool(true)
+                                } else {
+                                    Literal::Bool(false)
+                                }
+                            }
+                        }
                     }
                     _ => {
                         println!("{}Invalid type check: {}{:?}", Color::BrightRed, Color::Red, ident);

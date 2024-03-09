@@ -89,8 +89,8 @@ Todo:
 - [x] printing
 - [x] conditionals (if/else)
 - [x] input
-- [ ] type casting
-- [ ] type checking
+- [x] type casting
+- [x] type checking
 - [ ] error type
 - [ ] loops
 - [ ] functions
