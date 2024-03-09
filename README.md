@@ -61,7 +61,15 @@ if x == 2 {
 
 print "This is Matador (" + b + ")! 🐂"
 ```
-(prints 15 and 20 respectively)  
+### Output:
+```
+15
+35
+Hello, World!
+This is true
+x is 2
+This is Matador (true)! 🐂
+```
 See [tests](./matador_tests) for more examples.  
 
 Todo:
