@@ -91,12 +91,12 @@ Todo:
 - [x] input
 - [x] type casting
 - [x] type checking
-- [ ] error type
 - [ ] loops
 - [ ] functions
   - [ ] replace built in keywords like readln and print with functions
 - [ ] arrays
 - [ ] maps
+- [ ] ranges
 - [ ] structs
 - [ ] multi-file support
 - [ ] loading and running other matador programs

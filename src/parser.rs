@@ -212,6 +212,22 @@ impl Parser {
                 Node::If(Box::new(cond), then, els)
             }
 
+            TokenType::While => {
+                todo!()
+            }
+            TokenType::For => {
+                todo!()
+            }
+            TokenType::Break => {
+                todo!()
+            }
+            TokenType::Continue => {
+                todo!()
+            }
+            TokenType::In => {
+                todo!()
+            }
+
             TokenType::Op(Operator::Minus) => {
                 // negative sign, get the next token
                 self.shunting_yard(Node::Negative)
@@ -226,7 +242,6 @@ impl Parser {
             TokenType::String(s) => self.shunting_yard(Node::Literal(Literal::String(s.clone()))),
             TokenType::Bool(b) => self.shunting_yard(Node::Literal(Literal::Bool(*b))),
 
-            //TokenType::Newline => self.next(),
             TokenType::EOF => Node::EOF,
             _ => {
                 // invalid token, dump info and exit
