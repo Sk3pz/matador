@@ -10,6 +10,7 @@ mod literal;
 mod postfix;
 mod operator;
 
+
 const TEST_CODE: &str = include_str!("../matador_tests/calculator.mtdr");
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {

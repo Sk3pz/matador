@@ -24,10 +24,6 @@ impl Interpreter {
         })
     }
 
-    fn set_var(&mut self, ident: &str, value: Literal) {
-        self.env.insert(ident.to_string(), value);
-    }
-
     pub fn interpret(&mut self, nodes: Vec<Node>) {
         for node in nodes {
             self.eval(node);
