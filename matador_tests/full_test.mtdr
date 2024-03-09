@@ -21,7 +21,6 @@ let y = 10
 
 // type tests
 let neg = -1
-let neg2 = - 1
 let flt = 1.0
 let str = "Hello, World!"
 let b = true
@@ -29,21 +28,19 @@ let b = true
 let result = x + y // addition
 
 // printing
-print "result: " + result
+print result
 
 // reassignment
 x = 2
-print "x: " + x
-print "y: " + y
-print "result: " + result
-print x + " * " + y + " + " + result + " = "
 y = x * y + result
+
 print y
-drop y // free y from memory to save ram
+// free y from memory as it is not used again
+drop y
 print str
 
 // conditionals
-if (true) {
+if true {
     print "This is true"
 } else {
     print "This is false"
@@ -56,7 +53,5 @@ if x == 2 {
 } else {
    print "x is not 2 or 3"
 }
-
-drop x
 
 print "This is Matador (" + b + ")! 🐂"
