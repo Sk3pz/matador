@@ -1,7 +1,9 @@
 use std::fmt::Display;
 use better_term::{Color, flush_styles};
-use crate::lexer::{Operator, Token, TokenType};
+use crate::lexer::{Token, TokenType};
+use crate::operator::Operator;
 use crate::literal::Literal;
+use crate::postfix::{ShuntedStack, ShuntedStackItem};
 
 // AST Nodes
 #[derive(Debug, PartialEq, Clone)]
@@ -11,12 +13,17 @@ pub enum Node {
     Ident(String),
 
     // block
-    Block(Vec<Box<Node>>),
+    Block(Vec<Node>),
 
     // operations
     BinOp(Box<Node>, Operator, Box<Node>),
+    ShuntedStack(ShuntedStack),
     VarDecl(String, Option<Box<Node>>),
     If(Box<Node>, Option<Box<Node>>, Option<Box<Node>>),
+
+    // arithmetic
+    Expression, // ( ... )
+    Negative,
 
     Print(Box<Node>),
     Drop(Box<Node>),
@@ -36,6 +43,9 @@ impl Display for Node {
         match self {
             Node::Literal(n) => write!(f, "LIT {}", n),
             Node::Ident(ident) => write!(f, "IDENT '{}'", ident),
+            Node::Negative => write!(f, "NEG"),
+            Node::Expression => write!(f, "EXPR"),
+            Node::ShuntedStack(stack) => write!(f, "STACK({:?})", stack),
             Node::BinOp(left, op, right) => write!(f, "EQ({} {} {})", left, op, right),
             Node::Block(nodes) => {
                 write!(f, "BLOCK{{")?;
@@ -101,7 +111,8 @@ impl Parser {
             TokenType::LBrace => {
                 let mut nodes = Vec::new();
                 while self.peek().token_type != TokenType::RBrace {
-                    nodes.push(Box::new(self.next()));
+                    nodes.push(self.next());
+                    self.pos += 1;
                 }
                 self.pos += 1;
                 Node::Block(nodes)
@@ -133,7 +144,7 @@ impl Parser {
                         let expr = self.next();
                         Node::VarDecl(ident, Some(Box::new(expr)))
                     }
-                    _ => self.expression_stmt(Node::Ident(ident))
+                    _ => self.shunting_yard(Node::Ident(ident))
                 }
             },
 
@@ -152,11 +163,21 @@ impl Parser {
                 Node::If(Box::new(cond), then, els)
             }
 
-            TokenType::Int(n) => self.expression_stmt(Node::Literal(Literal::Int(*n))),
-            TokenType::Float(n) => self.expression_stmt(Node::Literal(Literal::Float(*n))),
-            TokenType::String(s) => self.expression_stmt(Node::Literal(Literal::String(s.clone()))),
-            TokenType::Bool(b) => self.expression_stmt(Node::Literal(Literal::Bool(*b))),
+            TokenType::Op(Operator::Minus) => {
+                // negative sign, get the next token
+                self.shunting_yard(Node::Negative)
+            },
 
+            TokenType::Op(Operator::LParen) => {
+                self.shunting_yard(Node::Expression)
+            }
+
+            TokenType::Int(n) => self.shunting_yard(Node::Literal(Literal::Int(*n))),
+            TokenType::Float(n) => self.shunting_yard(Node::Literal(Literal::Float(*n))),
+            TokenType::String(s) => self.shunting_yard(Node::Literal(Literal::String(s.clone()))),
+            TokenType::Bool(b) => self.shunting_yard(Node::Literal(Literal::Bool(*b))),
+
+            TokenType::Newline => self.next(),
             TokenType::EOF => Node::EOF,
             _ => {
                 // invalid token, dump info and exit
@@ -181,151 +202,153 @@ impl Parser {
         }
     }
 
-    fn expression_stmt(&mut self, lhs: Node) -> Node {
-        if let TokenType::Op(_) = self.peek().token_type {
-            let op = self.consume_op();
-            self.pos += 1;
-            let rhs = self.condi();
-            Node::BinOp(Box::new(lhs), op, Box::new(rhs))
-        } else {
-             lhs
-        }
-    }
+    fn shunting_yard(&mut self, lhs: Node) -> Node {
+        let mut postfix = ShuntedStack::new();
+        let mut op_stack = Vec::new();
 
-    fn consume_op(&mut self) -> Operator {
-        let token = &self.tokens[self.pos];
-        match &token.token_type {
-            TokenType::Op(op) => op.clone(),
+        let mut last_op: Option<Operator> = None;
+        let mut negative = false;
+        let mut last_was_lit = false;
+
+        match lhs {
+            Node::Literal(_) | Node::Ident(_) => {
+                postfix.push(ShuntedStackItem::Operand(lhs));
+            }
+            Node::Negative => {
+                negative = true;
+            }
+            Node::Expression => {
+                op_stack.push(Operator::LParen);
+                last_op = Some(Operator::LParen);
+            }
             _ => {
-                println!("{}Invalid token (co): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                println!("{}Invalid token (as): {}{}", Color::BrightRed, Color::Red, lhs);
                 flush_styles();
                 std::process::exit(0);
             }
         }
+
+        // while the next token is an operator, ident, or literal
+        while self.pos < self.tokens.len() {
+            let token = &self.tokens[self.pos];
+            match &token.token_type {
+                TokenType::Op(op) => {
+                    match op {
+                        Operator::LParen => {
+                            op_stack.push(op.clone());
+                            if last_was_lit {
+                                // error: missing operator
+                                println!("{}Invalid token (aslp): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                                flush_styles();
+                                std::process::exit(0);
+                            }
+                            last_op = None;
+                            last_was_lit = false;
+                            negative = false;
+                        }
+                        Operator::RParen => {
+                            last_was_lit = false;
+                            let mut found = false;
+                            while let Some(op) = op_stack.pop() {
+                                if op == Operator::LParen {
+                                    found = true;
+                                    break;
+                                }
+                                postfix.push(ShuntedStackItem::Operator(op));
+                            }
+
+                            if !found {
+                                // error: missing left parenthesis
+                                println!("{}Invalid token (asrp): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                                flush_styles();
+                                std::process::exit(0);
+                            }
+
+                            last_op = Some(op.clone());
+                            negative = false;
+                        }
+                        Operator::Minus => {
+                            if last_op.is_some() {
+                                // if the last token was an operator, then this is a negative sign
+                                negative = true;
+                            } else {
+                                // if the last token was not an operator, then this is a subtraction sign
+                                op_stack.push(op.clone());
+                            }
+                            last_op = Some(op.clone());
+                            last_was_lit = false;
+                        }
+                        _ => {
+                            if last_op.is_some() {
+                                // error: two operators in a row
+                                println!("{}Invalid token (astop): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                                flush_styles();
+                                std::process::exit(0);
+                            }
+                            last_op = Some(op.clone());
+                            last_was_lit = false;
+                            negative = false;
+                            while let Some(op2) = op_stack.pop() {
+                                if op2 == Operator::LParen {
+                                    op_stack.push(op2);
+                                    break;
+                                }
+                                if op2.precedence() < op.precedence() {
+                                    op_stack.push(op2);
+                                    break;
+                                }
+                                postfix.push(ShuntedStackItem::Operator(op2));
+                            }
+                            op_stack.push(op.clone());
+                        }
+                    }
+                }
+                TokenType::Int(n) => {
+                    postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Int(*n))));
+                    last_op = None;
+                    last_was_lit = true;
+                }
+                TokenType::Float(n) => {
+                    postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Float(*n))));
+                    last_op = None;
+                    last_was_lit = true;
+                }
+                TokenType::Ident(ident) => {
+                    postfix.push(ShuntedStackItem::Operand(Node::Ident(ident.clone())));
+                    last_op = None;
+                    last_was_lit = true;
+                }
+                TokenType::Bool(b) => {
+                    postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Bool(*b))));
+                    last_op = None;
+                    last_was_lit = true;
+                }
+                TokenType::String(s) => {
+                    postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::String(s.clone()))));
+                    last_op = None;
+                    last_was_lit = true;
+                }
+                // exit the loop (not needed, but good to explicitly state the usage of newlines)
+                TokenType::Newline => break,
+                _ => break, // exit the loop
+            }
+            self.pos += 1;
+        }
+
+        // push the remaining operators to the postfix stack
+        while let Some(op) = op_stack.pop() {
+            postfix.push(ShuntedStackItem::Operator(op));
+        }
+
+        if negative {
+            postfix.push(ShuntedStackItem::Operator(Operator::Minus));
+        }
+
+        Node::ShuntedStack(postfix)
     }
 
     fn peek(&self) -> &Token {
         &self.tokens[self.pos]
-    }
-
-    fn condi(&mut self) -> Node {
-        let mut node = self.term();
-        while let TokenType::Op(op) = &self.peek().token_type {
-            let op = op.clone();
-            match op {
-                Operator::Eq | Operator::Neq | Operator::Gt | Operator::Lt | Operator::Gte | Operator::Lte => {
-                    self.pos += 1;
-                    let rhs = self.term();
-                    node = Node::BinOp(Box::new(node), op, Box::new(rhs));
-                }
-                _ => break,
-            }
-        }
-        node
-    }
-
-    fn term(&mut self) -> Node {
-        let mut node = self.factor();
-        while let TokenType::Op(op) = &self.peek().token_type {
-            let op = op.clone();
-            match op {
-                Operator::Plus | Operator::Minus => {
-                    self.pos += 1;
-                    let rhs = self.factor();
-                    node = Node::BinOp(Box::new(node), op, Box::new(rhs));
-                }
-                _ => break,
-            }
-        }
-        node
-    }
-
-    fn factor(&mut self) -> Node {
-        let mut node = self.power();
-        while let TokenType::Op(op) = &self.peek().token_type {
-            let op = op.clone();
-            match op {
-                Operator::Mul | Operator::Div | Operator::Mod => {
-                    self.pos += 1;
-                    let rhs = self.power();
-                    node = Node::BinOp(Box::new(node), op, Box::new(rhs));
-                }
-                Operator::And | Operator::Or | Operator::Xor => {
-                    self.pos += 1;
-                    let rhs = self.power();
-                    node = Node::BinOp(Box::new(node), op, Box::new(rhs));
-                }
-                Operator::LShift | Operator::RShift => {
-                    self.pos += 1;
-                    let rhs = self.power();
-                    node = Node::BinOp(Box::new(node), op, Box::new(rhs));
-                }
-                _ => break,
-            }
-        }
-        node
-    }
-
-    fn power(&mut self) -> Node {
-        let mut node = self.unary();
-        while let TokenType::Op(op) = &self.peek().token_type {
-            let op = op.clone();
-            match op {
-                Operator::Pow => {
-                    self.pos += 1;
-                    let rhs = self.unary();
-                    node = Node::BinOp(Box::new(node), op, Box::new(rhs));
-                }
-                _ => break,
-            }
-        }
-        node
-    }
-
-    fn unary(&mut self) -> Node {
-        if let TokenType::Op(op) = &self.peek().token_type {
-            match op {
-                Operator::Minus => {
-                    self.pos += 1;
-                    let rhs = self.unary();
-                    Node::BinOp(Box::new(Node::Literal(Literal::Int(0))), Operator::Minus, Box::new(rhs))
-                }
-                _ => self.primary(),
-            }
-        } else {
-            self.primary()
-        }
-    }
-
-    fn primary(&mut self) -> Node {
-        let token = &self.tokens[self.pos];
-        match &token.token_type {
-            TokenType::Int(n) => {
-                self.pos += 1;
-                Node::Literal(Literal::Int(*n))
-            }
-            TokenType::String(s) => {
-                self.pos += 1;
-                Node::Literal(Literal::String(s.clone()))
-            }
-            TokenType::Float(n) => {
-                self.pos += 1;
-                Node::Literal(Literal::Float(*n))
-            }
-            TokenType::Bool(b) => {
-                self.pos += 1;
-                Node::Literal(Literal::Bool(*b))
-            }
-            TokenType::Ident(ident) => {
-                self.pos += 1;
-                Node::Ident(ident.clone())
-            }
-            _ => {
-                println!("{}Invalid token (p): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
-                flush_styles();
-                std::process::exit(0);
-            }
-        }
     }
 
 }

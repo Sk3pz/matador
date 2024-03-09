@@ -60,6 +60,22 @@ impl Literal {
         }
     }
 
+    pub fn inc(&self) -> Option<Literal> {
+        match self {
+            Literal::Int(a) => Some(Literal::Int(a + 1)),
+            Literal::Float(a) => Some(Literal::Float(a + 1.0)),
+            _ => None,
+        }
+    }
+
+    pub fn dec(&self) -> Option<Literal> {
+        match self {
+            Literal::Int(a) => Some(Literal::Int(a - 1)),
+            Literal::Float(a) => Some(Literal::Float(a - 1.0)),
+            _ => None,
+        }
+    }
+
     pub fn eq(&self, other: &Literal) -> Option<Literal> {
         match (self, other) {
             (Literal::Int(a), Literal::Int(b)) => Some(Literal::Bool(a == b)),

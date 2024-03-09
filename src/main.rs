@@ -1,11 +1,14 @@
 use std::time::Duration;
 use better_term::{Color, flush_styles};
 use crate::lexer::Lexer;
+//use crate::parser::Node;
 
 mod parser;
 mod interpreter;
 mod lexer;
 mod literal;
+mod postfix;
+mod operator;
 
 const TEST_CODE: &str = include_str!("../matador_tests/full_test.mtdr");
 

@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use crate::operator::Operator;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
@@ -32,6 +33,7 @@ pub enum TokenType {
     Bool(bool),
     String(String),
 
+    Newline,
     EOF,
 }
 
@@ -56,79 +58,16 @@ impl Display for StaticType {
 
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub enum Operator {
-    // arithmetic
-    Plus,   // +
-    Minus,  // -
-    Mul,    // *
-    Div,    // /
-    Mod,    // %
-    Pow,    // **
-
-    // misc
-    Dec,    // .
-    Range,  // ..
-
-    // control flow
-    LParen, // (
-    RParen, // )
-    LBracket, // [
-    RBracket, // ]
-
-    // bitwise
-    And,    // &
-    Or,     // |
-    Xor,    // ^
-    Not,    // !
-    LShift, // <<
-    RShift, // >>
-
-    // conditionals
-    Eq,     // ==
-    Neq,    // !=
-    Gt,     // >
-    Lt,     // <
-    Gte,    // >=
-    Lte,    // <=
-}
-
-impl Display for Operator {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let op = match self {
-            Operator::Plus => "+",
-            Operator::Minus => "-",
-            Operator::Mul => "*",
-            Operator::Div => "/",
-            Operator::Mod => "%",
-            Operator::Pow => "**",
-            Operator::Dec => ".",
-            Operator::Range => "..",
-            Operator::LParen => "(",
-            Operator::RParen => ")",
-            Operator::LBracket => "[",
-            Operator::RBracket => "]",
-            Operator::And => "&",
-            Operator::Or => "|",
-            Operator::Xor => "^",
-            Operator::Not => "~",
-            Operator::LShift => "<<",
-            Operator::RShift => ">>",
-            Operator::Eq => "==",
-            Operator::Neq => "!=",
-            Operator::Gt => ">",
-            Operator::Lt => "<",
-            Operator::Gte => ">=",
-            Operator::Lte => "<=",
-        };
-        write!(f, "{}", op)
-    }
-}
-
 #[derive(Debug, PartialEq, Clone)]
 pub struct Token {
     pub(crate) token_type: TokenType,
     lexeme: String,
+}
+
+impl Display for Token {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?} : \"{}\"", self.token_type, self.lexeme)
+    }
 }
 
 pub struct Lexer<'a> {
@@ -166,9 +105,6 @@ impl<'a> Lexer<'a> {
         // iterate through chars until a pattern is found
         while self.pos < self.chars.len() {
             let c = self.chars[self.pos];
-            if c.is_whitespace() {
-                break;
-            }
             // skip comments
             if c == '/' {
                 if self.pos + 1 < self.chars.len() && self.chars[self.pos + 1] == '/' {
@@ -188,8 +124,33 @@ impl<'a> Lexer<'a> {
                     continue;
                 }
             }
+            // handle ending tokens
+            if c == ')' || c == '}' || c == ']' || c == ',' || c == '\n' {
+                if !builder.is_empty() {
+                    break;
+                }
+                builder.push(c);
+                self.pos += 1;
+                break;
+            }
+            // handle leading single character tokens
+            // todo: this probably wont allow x =1, and would treat =1 as an identifier
+            if c == '(' || c == '{' || c == '[' || c == '!' || c == '\n' {
+                builder.push(c);
+                self.pos += 1;
+                break;
+            }
+
+            if c.is_whitespace() {
+                break;
+            }
             builder.push(c);
             self.pos += 1;
+
+            // handle multi-character modifiers
+            if builder == "++" || builder == "--" {
+                break;
+            }
         }
         if builder.is_empty() {
             // handle cases where it exits the loop without adding anything to the builder
@@ -220,6 +181,8 @@ impl<'a> Lexer<'a> {
             "bool" => TokenType::StaticType(StaticType::Int),
 
             // operators
+            "(" => TokenType::Op(Operator::LParen),
+            ")" => TokenType::Op(Operator::RParen),
             "=" => TokenType::Assign,
             "+" => TokenType::Op(Operator::Plus),
             "-" => TokenType::Op(Operator::Minus),
@@ -227,18 +190,18 @@ impl<'a> Lexer<'a> {
             "/" => TokenType::Op(Operator::Div),
             "%" => TokenType::Op(Operator::Mod),
             "**" => TokenType::Op(Operator::Pow),
-            "." => TokenType::Op(Operator::Dec),
+            "." => TokenType::Op(Operator::Decimal),
             ".." => TokenType::Op(Operator::Range),
-            "(" => TokenType::Op(Operator::LParen),
-            ")" => TokenType::Op(Operator::RParen),
             "[" => TokenType::Op(Operator::LBracket),
             "]" => TokenType::Op(Operator::RBracket),
             "&" => TokenType::Op(Operator::And),
             "|" => TokenType::Op(Operator::Or),
             "^" => TokenType::Op(Operator::Xor),
-            "~" => TokenType::Op(Operator::Not),
+            "!" => TokenType::Op(Operator::Not),
             "<<" => TokenType::Op(Operator::LShift),
             ">>" => TokenType::Op(Operator::RShift),
+            "++" => TokenType::Op(Operator::Inc),
+            "--" => TokenType::Op(Operator::Dec),
 
             // conditionals
             "==" => TokenType::Op(Operator::Eq),
@@ -252,14 +215,23 @@ impl<'a> Lexer<'a> {
             "true" | "false" => {
                 TokenType::Bool(builder == "true")
             }
+
+            // newlines
+            "\n" => TokenType::Newline,
+
             _ if builder.starts_with('"') => { // string literals
                 builder = String::from(&builder[1..]);
-                while self.pos < self.chars.len() && self.chars[self.pos] != '"' {
-                    builder.push(self.chars[self.pos]);
+                if builder.ends_with('"') {
+                    builder.pop();
+                    TokenType::String(builder.clone())
+                } else {
+                    while self.pos < self.chars.len() && self.chars[self.pos] != '"' {
+                        builder.push(self.chars[self.pos]);
+                        self.pos += 1;
+                    }
                     self.pos += 1;
+                    TokenType::String(builder.clone())
                 }
-                self.pos += 1;
-                TokenType::String(builder.clone())
             },
             _ if builder.chars().all(|c| c.is_digit(10) || c == '.' || c == '-') => {
                 // todo: math does not allow for parentheses right now
@@ -282,7 +254,12 @@ impl<'a> Lexer<'a> {
 
     fn skip_whitespace(&mut self) {
         while self.pos < self.chars.len() && self.chars[self.pos].is_whitespace() {
-            self.pos += 1;
+            let next = self.chars[self.pos];
+            if next != '\n' && next.is_whitespace() {
+                self.pos += 1;
+            } else {
+                break;
+            }
         }
     }
 }

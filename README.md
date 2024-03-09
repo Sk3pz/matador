@@ -65,7 +65,7 @@ print "This is Matador (" + b + ")! 🐂"
 See [tests](./matador_tests) for more examples.  
 
 Todo:
-- [ ] basic arithmetic
+- [x] basic arithmetic
   - [x] addition / subtraction
   - [x] multiplication / division
   - [x] modulo
@@ -74,7 +74,7 @@ Todo:
   - [x] power
   - [x] comparison
   - [x] bitwise / logical
-  - [ ] parentheses
+  - [x] parentheses / order of operations
 - [x] comments
 - [x] types
 - [x] variables
