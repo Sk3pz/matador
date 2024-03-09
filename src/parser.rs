@@ -1,6 +1,6 @@
 use std::fmt::Display;
 use better_term::{Color, flush_styles};
-use crate::lexer::{Token, TokenType};
+use crate::lexer::{StaticType, Token, TokenType};
 use crate::operator::Operator;
 use crate::literal::Literal;
 use crate::postfix::{ShuntedStack, ShuntedStackItem};
@@ -25,7 +25,8 @@ pub enum Node {
     Expression, // ( ... )
     Negative,
 
-    Print(Box<Node>),
+    Print(Box<Node>, bool),
+    Read(StaticType),
     Drop(Box<Node>),
     EOF,
 }
@@ -76,7 +77,8 @@ impl Display for Node {
                     write!(f, "ALLOCATE '{}'", ident)
                 }
             }
-            Node::Print(node) => write!(f, "PRINT {}", node),
+            Node::Read(typ) => write!(f, "READ {}", typ),
+            Node::Print(node, newline) => write!(f, "PRINT {}{}", node, if *newline { "LN" } else { "" }),
             Node::Drop(node) => write!(f, "DROP {}", node),
             Node::EOF => write!(f, "EOF"),
         }
@@ -128,9 +130,25 @@ impl Parser {
                     Node::VarDecl(ident, None)
                 }
             }
+            TokenType::ReadStr => {
+                Node::Read(StaticType::String)
+            }
+            TokenType::ReadInt => {
+                Node::Read(StaticType::Int)
+            }
+            TokenType::ReadFloat => {
+                Node::Read(StaticType::Float)
+            }
+            TokenType::ReadBool => {
+                Node::Read(StaticType::Bool)
+            }
             TokenType::Print => {
                 let expr = self.next();
-                Node::Print(Box::new(expr))
+                Node::Print(Box::new(expr), false)
+            }
+            TokenType::Println => {
+                let expr = self.next();
+                Node::Print(Box::new(expr), true)
             }
             TokenType::Drop => {
                 let expr = self.next();

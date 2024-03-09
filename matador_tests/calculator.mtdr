@@ -1,0 +1,32 @@
+/*
+    This is a simple example of a calculator written to demonstrate the syntax and abilities of Matador.
+    Written by Eric (Skepz) <skepz.dev@gmail.com>
+*/
+
+// Introduction message
+println "Welcome to the Matador Calculator!"
+
+// Get the first number
+print "Enter the first number: "
+let first = readint
+
+// Get the operator
+print "Enter the operator (+, -, *, /): "
+let operator = readln
+
+// Get the second number
+print "Enter the second number: "
+let second = readint
+
+// Perform the calculation
+if operator == "+" {
+    println "The result is: " + (first + second)
+} else if operator == "-" {
+    println "The result is: " + (first - second)
+} else if operator == "*" {
+    println "The result is: " + (first * second)
+} else if operator == "/" {
+    println "The result is: " + (first / second)
+} else {
+    println "Invalid operator!"
+}

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use better_term::{Color, flush_styles};
+use better_term::{Color, flush_styles, read_input};
+use crate::lexer::StaticType;
 use crate::operator::Operator;
 use crate::literal::Literal;
 use crate::parser::Node;
@@ -280,9 +281,38 @@ impl Interpreter {
                     std::process::exit(0);
                 }).clone()
             },
-            Node::Print(node) => {
-                println!("{}", self.eval(*node));
+            Node::Print(node, newline) => {
+                print!("{}{}", self.eval(*node), if newline { "\n" } else { "" });
                 Literal::Int(0)
+            }
+            Node::Read(typ) => {
+                let input = read_input!();
+                match typ {
+                    StaticType::Int => {
+                        Literal::Int(input.parse().unwrap_or_else(|_| {
+                            println!("{}Invalid input: {}{}", Color::BrightRed, Color::Red, input);
+                            flush_styles();
+                            std::process::exit(0);
+                        }))
+                    },
+                    StaticType::Float => {
+                        Literal::Float(input.parse().unwrap_or_else(|_| {
+                            println!("{}Invalid input: {}{}", Color::BrightRed, Color::Red, input);
+                            flush_styles();
+                            std::process::exit(0);
+                        }))
+                    },
+                    StaticType::Bool => {
+                        Literal::Bool(input.parse().unwrap_or_else(|_| {
+                            println!("{}Invalid input: {}{}", Color::BrightRed, Color::Red, input);
+                            flush_styles();
+                            std::process::exit(0);
+                        }))
+                    },
+                    StaticType::String => {
+                        Literal::String(input)
+                    },
+                }
             }
             Node::Drop(node) => {
                 // drop the variable if it is one

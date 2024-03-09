@@ -88,6 +88,7 @@ Todo:
 - [x] variables
 - [x] printing
 - [x] conditionals (if/else)
+- [x] input
 - [ ] static type checking and declaration
 - [ ] loops
 - [ ] functions
