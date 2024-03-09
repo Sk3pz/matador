@@ -234,7 +234,6 @@ impl<'a> Lexer<'a> {
                 }
             },
             _ if builder.chars().all(|c| c.is_digit(10) || c == '.' || c == '-') => {
-                // todo: math does not allow for parentheses right now
                 if builder.contains('.') {
                     TokenType::Float(builder.parse().unwrap())
                 } else {
