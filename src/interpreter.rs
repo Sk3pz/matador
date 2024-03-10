@@ -140,6 +140,7 @@ impl Interpreter {
             Node::Drop(node) => {
                 // drop the variable if it is one
                 if let Node::Ident(ident) = *node {
+                    println!("Dropping variable: {}", ident);
                     self.env.remove(&ident);
                 }
                 Variable::Int(0)

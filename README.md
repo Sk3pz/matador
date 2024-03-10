@@ -1,4 +1,4 @@
-    ⠀⠀⣴⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  ⢸⣦⡀⠀  
+    ⠀⠀⣴⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣦⡀⠀  
     ⠀⢸⣿⣧⣀⣀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⢀⣀⣼⣿⡧⠀  
     ⠀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⠿⠁⠀  
     ⠀⠀⠀⠀⠙⠛⠿⠿⠿⠿⣿⠀⠀⠀⠀⠀⠀⠀⠀⣿⡿⠿⠿⠿⠛⠋⠁⠀⠀⠀  
@@ -16,59 +16,37 @@ Matador is a general purpose interpreted programming language for embedding in g
 ### Code Example (Currently runs):
 ```
 /*
-Matador Programming Language Test
-Written by Eric (Skepz) <skepz.dev@gmail.com>
+    This is a simple example of a calculator written to demonstrate the syntax and abilities of Matador.
+    Written by Eric (Skepz) <skepz.dev@gmail.com>
 */
 
-// variable declarations
-let x = 5
-let y = 10
+// Introduction message
+println "Welcome to the Matador Calculator!"
 
-// type tests
-let neg = -1
-let flt = 1.0
-let str = "Hello, World!"
-let b = true
+// Get the first number
+print "Enter the first number: "
+let first = readint
 
-let result = x + y // addition
+// Get the operator
+print "Enter the operator (+, -, *, /): "
+let operator = readln
 
-// printlning
-println result
+// Get the second number
+print "Enter the second number: "
+let second = readint
 
-// reassignment
-x = 2
-y = x * y + result
-
-println y
-// free y from memory as it is not used again
-drop y
-println str
-
-// conditionals
-if true {
-    println "This is true"
+// Perform the calculation
+if operator == "+" {
+    println "The result is: " + (first + second)
+} else if operator == "-" {
+    println "The result is: " + (first - second)
+} else if operator == "*" {
+    println "The result is: " + (first * second)
+} else if operator == "/" {
+    println "The result is: " + (first / second)
 } else {
-    println "This is false"
+    println "Invalid operator!"
 }
-
-if x == 2 {
-   println "x is 2"
-} else if x == 3 {
-   println "x is 3"
-} else {
-   println "x is not 2 or 3"
-}
-
-println "This is Matador (" + b + ")! 🐂"
-```
-### Output:
-```
-15
-35
-Hello, World!
-This is true
-x is 2
-This is Matador (true)! 🐂
 ```
 See [tests](./matador_tests) for more examples.  
 
@@ -116,4 +94,5 @@ Todo:
 - [ ] loading and running other matador programs (maybe done through a function call)
 - [ ] expose API for creating libraries
 - [ ] expose lexer for linting and syntax highlighting
+- [ ] better error messages
 - [ ] optimize and refactor

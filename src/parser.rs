@@ -20,7 +20,7 @@ impl Parser {
         let mut nodes = Vec::new();
         while self.pos < self.tokens.len() {
             nodes.push(self.next());
-            //println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
+            println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
             flush_styles()
         }
         nodes
@@ -70,8 +70,8 @@ impl Parser {
                 Node::Print(Box::new(expr), true)
             }
             TokenType::Drop => {
-                let expr = self.next();
-                Node::Drop(Box::new(expr))
+                let expr = self.consume_ident();
+                Node::Drop(Box::new(Node::Ident(expr)))
             }
             // todo: in keyword for ranges maps and arrays
             TokenType::Ident(ident) => {
