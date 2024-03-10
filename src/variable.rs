@@ -360,6 +360,7 @@ impl Variable {
     pub fn assign(&mut self, i: Variable, v: Variable) -> Option<Variable> {
         match self {
             Variable::String(s) => {
+                // insert a string at a specific index
                 if let Variable::Int(i) = i {
                     if i < 0 || i as usize >= s.len() {
                         println!("{}Index out of range: {}{}", Color::BrightRed, Color::Red, i);
@@ -367,8 +368,12 @@ impl Variable {
                         std::process::exit(0);
                     }
                     let mut s = s.clone();
-                    s.remove(i as usize);
-                    s.insert(i as usize, v.to_string().unwrap().to_string().chars().next().unwrap());
+                    let Variable::String(v) = v else {
+                        println!("{}Invalid assignment: {}{}", Color::BrightRed, Color::Red, v);
+                        flush_styles();
+                        std::process::exit(0);
+                    };
+                    s.insert_str(i as usize, &v);
                     Some(Variable::String(s))
                 } else {
                     None
