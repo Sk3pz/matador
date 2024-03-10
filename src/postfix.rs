@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
+use crate::node::Node;
 use crate::operator::Operator;
-use crate::parser::Node;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ShuntedStackItem {

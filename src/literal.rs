@@ -1,6 +1,27 @@
 use std::fmt::Display;
 use better_term::{Color, flush_styles};
 
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum StaticType {
+    Int,
+    Float,
+    String,
+    Bool,
+}
+
+impl Display for StaticType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let typ = match self {
+            StaticType::Int => "int",
+            StaticType::Float => "float",
+            StaticType::String => "string",
+            StaticType::Bool => "bool",
+        };
+        write!(f, "{}", typ)
+    }
+
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Literal {
     Int(i64),
@@ -129,14 +150,14 @@ impl Literal {
         }
     }
 
-    pub fn and(&self, other: &Literal) -> Option<Literal> {
+    pub fn bitand(&self, other: &Literal) -> Option<Literal> {
         match (self, other) {
             (Literal::Bool(a), Literal::Bool(b)) => Some(Literal::Bool(*a && *b)),
             _ => None,
         }
     }
 
-    pub fn or(&self, other: &Literal) -> Option<Literal> {
+    pub fn bitor(&self, other: &Literal) -> Option<Literal> {
         match (self, other) {
             (Literal::Bool(a), Literal::Bool(b)) => Some(Literal::Bool(*a || *b)),
             _ => None,
@@ -167,6 +188,20 @@ impl Literal {
     pub fn not(&self) -> Option<Literal> {
         match self {
             Literal::Bool(a) => Some(Literal::Bool(!*a)),
+            _ => None,
+        }
+    }
+
+    pub fn and(&self, other: &Literal) -> Option<Literal> {
+        match (self, other) {
+            (Literal::Bool(a), Literal::Bool(b)) => Some(Literal::Bool(*a && *b)),
+            _ => None,
+        }
+    }
+
+    pub fn or(&self, other: &Literal) -> Option<Literal> {
+        match (self, other) {
+            (Literal::Bool(a), Literal::Bool(b)) => Some(Literal::Bool(*a || *b)),
             _ => None,
         }
     }

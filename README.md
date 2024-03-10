@@ -12,7 +12,7 @@
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⣿⠆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠷⣦⣤⡾⠋⠀ 
 # Matador
-Matador is an interpreted programming language written in rust designed for stock analysis using Chroma.
+Matador is a general purpose interpreted programming language for embedding in games and other applications.
 ### Code Example (Currently runs):
 ```
 /*
@@ -92,6 +92,15 @@ Todo:
 - [x] type casting
 - [x] type checking
 - [ ] loops
+  - [x] while
+  - [ ] loop
+  - [ ] for
+  - [ ] break
+  - [ ] continue
+- [ ] boolean logic
+  - [x] and
+  - [x] or
+  - [ ] leading not
 - [ ] functions
   - [ ] replace built in keywords like readln and print with functions
 - [ ] arrays
@@ -101,3 +110,5 @@ Todo:
 - [ ] multi-file support
 - [ ] loading and running other matador programs
 - [ ] expose API for creating libraries
+- [ ] expose lexer for linting and syntax highlighting
+- [ ] optimize and refactor

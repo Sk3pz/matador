@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use crate::literal::StaticType;
 use crate::operator::Operator;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -44,27 +45,6 @@ pub enum TokenType {
     String(String),
 
     EOF,
-}
-
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub enum StaticType {
-    Int,
-    Float,
-    String,
-    Bool,
-}
-
-impl Display for StaticType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let typ = match self {
-            StaticType::Int => "int",
-            StaticType::Float => "float",
-            StaticType::String => "string",
-            StaticType::Bool => "bool",
-        };
-        write!(f, "{}", typ)
-    }
-
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -210,12 +190,14 @@ impl<'a> Lexer<'a> {
             ".." => TokenType::Op(Operator::Range),
             "[" => TokenType::Op(Operator::LBracket),
             "]" => TokenType::Op(Operator::RBracket),
-            "&" => TokenType::Op(Operator::And),
-            "|" => TokenType::Op(Operator::Or),
+            "&" => TokenType::Op(Operator::BitAnd),
+            "|" => TokenType::Op(Operator::BitOr),
             "^" => TokenType::Op(Operator::Xor),
             "!" => TokenType::Op(Operator::Not),
             "<<" => TokenType::Op(Operator::LShift),
             ">>" => TokenType::Op(Operator::RShift),
+            "&&" => TokenType::Op(Operator::And),
+            "||" => TokenType::Op(Operator::Or),
             "++" => TokenType::Op(Operator::Inc),
             "--" => TokenType::Op(Operator::Dec),
 

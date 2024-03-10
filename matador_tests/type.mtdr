@@ -9,13 +9,3 @@ if x is int {
 
 let y = x as bool
 println y
-
-
-
-
-
-
-
-
-
-

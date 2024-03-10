@@ -24,8 +24,8 @@ pub enum Operator {
     RBracket, // ]
 
     // bitwise
-    And,    // &
-    Or,     // |
+    BitAnd,    // &
+    BitOr,     // |
     Xor,    // ^
     Not,    // !
     LShift, // <<
@@ -38,18 +38,22 @@ pub enum Operator {
     Lt,     // <
     Gte,    // >=
     Lte,    // <=
+    And,    // &&
+    Or,     // ||
 }
 
 impl Operator {
     pub fn precedence(&self) -> Option<u8> {
         match self {
-            Operator::Plus | Operator::Minus => Some(1),
-            Operator::Mul | Operator::Div | Operator::Mod => Some(2),
-            Operator::Inc | Operator::Dec => Some(3),
-            Operator::Pow => Some(4),
-            Operator::And | Operator::Or | Operator::Xor |
+            Operator::And | Operator::Or => Some(0),
+            Operator::Eq | Operator::Neq | Operator::Gt | Operator::Lt |
+            Operator::Gte | Operator::Lte => Some(1),
+            Operator::Inc | Operator::Dec => Some(2),
+            Operator::Plus | Operator::Minus => Some(3),
+            Operator::Mul | Operator::Div | Operator::Mod => Some(4),
+            Operator::BitAnd | Operator::BitOr | Operator::Xor |
             Operator::Not | Operator::LShift | Operator::RShift => Some(5),
-            Operator::Eq | Operator::Neq | Operator::Gt | Operator::Lt | Operator::Gte | Operator::Lte => Some(6),
+            Operator::Pow => Some(6),
             _ => None,
         }
     }
@@ -74,8 +78,8 @@ impl Operator {
             Operator::Pow => left.pow(&right),
 
             // bitwise
-            Operator::And => left.and(&right),
-            Operator::Or => left.or(&right),
+            Operator::BitAnd => left.bitand(&right),
+            Operator::BitOr => left.bitor(&right),
             Operator::Xor => left.xor(&right),
             Operator::Not => left.not(),
             Operator::LShift => left.shl(&right),
@@ -88,6 +92,9 @@ impl Operator {
             Operator::Lt => left.lt(&right),
             Operator::Gte => left.gte(&right),
             Operator::Lte => left.lte(&right),
+
+            Operator::And => left.and(&right),
+            Operator::Or => left.or(&right),
 
             _ => None,
         }
@@ -120,8 +127,8 @@ impl Display for Operator {
             Operator::RParen => ")",
             Operator::LBracket => "[",
             Operator::RBracket => "]",
-            Operator::And => "&",
-            Operator::Or => "|",
+            Operator::BitAnd => "&",
+            Operator::BitOr => "|",
             Operator::Xor => "^",
             Operator::Not => "~",
             Operator::LShift => "<<",
@@ -132,6 +139,8 @@ impl Display for Operator {
             Operator::Lt => "<",
             Operator::Gte => ">=",
             Operator::Lte => "<=",
+            Operator::And => "&&",
+            Operator::Or => "||",
         };
         write!(f, "{}", op)
     }

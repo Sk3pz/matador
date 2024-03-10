@@ -1,0 +1,28 @@
+/*
+  A FizzBuzz example program written in the matador programming language.
+  written by Eric (Skepz) <skepz.dev@gmail.com>
+*/
+
+// define x
+let x = 1
+
+// loop through 100 times
+while x <= 10000 {
+
+    if x % 3 == 0 && x % 5 == 0 {
+        // if x is divisible by 3 and 5
+        println "FizzBuzz"
+    } else if x % 3 == 0 {
+        // if x is divisible by 3
+        println "Fizz"
+    }else if x % 5 == 0 {
+        // if x is divisible by 5
+        println "Buzz"
+    } else {
+        // if x is not divisible by 3 or 5
+        println x
+    }
+
+
+    x = x + 1
+}

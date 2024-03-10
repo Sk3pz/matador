@@ -1,9 +1,9 @@
 use std::time::Duration;
 use better_term::{Color, flush_styles};
 use crate::lexer::Lexer;
-use crate::parser::Node;
 
 mod parser;
+mod node;
 mod interpreter;
 mod lexer;
 mod literal;
@@ -11,7 +11,7 @@ mod postfix;
 mod operator;
 
 
-const TEST_CODE: &str = include_str!("../matador_tests/calculator.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/fizzbuzz.mtdr");
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {
     let start = std::time::Instant::now();
@@ -36,7 +36,6 @@ fn main() {
         parser.parse()
     });
     //println!("{}Parsed in {}{:?}", Color::BrightGreen, Color::BrightYellow, parse_time);
-    //Node::display(&nodes);
     //println!("{}Interpreting nodes..", Color::BrightYellow);
     //flush_styles();
     let (_, interpret_time) = timed(|| {

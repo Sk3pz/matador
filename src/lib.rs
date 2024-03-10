@@ -2,6 +2,7 @@ use crate::lexer::Lexer;
 use crate::parser::Parser;
 
 mod parser;
+mod node;
 mod interpreter;
 mod lexer;
 mod literal;

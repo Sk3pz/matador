@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 use better_term::{Color, flush_styles, read_input};
-use crate::lexer::StaticType;
-use crate::literal::Literal;
-use crate::parser::Node;
+use crate::literal::{Literal, StaticType};
+use crate::node::Node;
 use crate::postfix::ShuntedStackItem;
 
 pub struct Interpreter {
@@ -70,7 +69,7 @@ impl Interpreter {
                                 if let Some(lit) = op.apply_unary(right.clone()) {
                                     operand_stack.push(lit);
                                 } else {
-                                    println!("{}Invalid operation: {}{:?}",
+                                    println!("{}Invalid operation (syops): {}{:?}",
                                          Color::BrightRed, Color::Red, right);
                                     flush_styles();
                                     std::process::exit(0);
@@ -84,8 +83,8 @@ impl Interpreter {
                             if let Some(lit) = op.apply_binary(left.clone(), right.clone()) {
                                 operand_stack.push(lit);
                             } else {
-                                println!("{}Invalid operation: {}{:?} + {:?}",
-                                         Color::BrightRed, Color::Red, left, right);
+                                println!("{}Invalid operation (syab): {}{:?} {} {:?}",
+                                         Color::BrightRed, Color::Red, left, op, right);
                                 flush_styles();
                                 std::process::exit(0);
                             }
@@ -257,6 +256,20 @@ impl Interpreter {
                         std::process::exit(0);
                     },
                 }
+            }
+            Node::While(cond, body) => {
+                let mut last = Literal::Int(0);
+                loop {
+                    // evaluate condition
+                    let condition = self.eval(*cond.clone()).to_bool();
+                    let Literal::Bool(c) = condition else { break; };
+                    if !c { break; }
+
+                    // run the body
+                    self.eval(*body.clone());
+                }
+
+                last
             }
             Node::EOF => Literal::Int(0),
             _ => {
