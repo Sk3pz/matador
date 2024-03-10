@@ -10,8 +10,11 @@ mod variable;
 mod postfix;
 mod operator;
 mod scope;
+pub mod debug;
 
-const TEST_CODE: &str = include_str!("../matador_tests/brainfuck.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/calculator.mtdr");
+
+pub const DEBUG_OUTPUT: bool = false;
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {
     let start = std::time::Instant::now();

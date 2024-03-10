@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use crate::debug_print;
 use crate::variable::VariableType;
 use crate::operator::Operator;
 
@@ -92,7 +93,7 @@ impl<'a> Lexer<'a> {
         let mut tokens = Vec::new();
         while self.pos < self.chars.len() {
             let token = self.next_token();
-            println!("{}: {:?}", tokens.len(), token);
+            debug_print!("{}: {:?}", tokens.len(), token);
             tokens.push(token);
         }
         if let Some(last) = tokens.last() {

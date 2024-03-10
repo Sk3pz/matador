@@ -1,4 +1,5 @@
 use better_term::{Color, flush_styles};
+use crate::debug_print;
 use crate::lexer::{Token, TokenType};
 use crate::operator::Operator;
 use crate::variable::{Variable, VariableType};
@@ -20,7 +21,7 @@ impl Parser {
         let mut nodes = Vec::new();
         while self.pos < self.tokens.len() {
             nodes.push(self.next());
-            println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
+            debug_print!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
             flush_styles()
         }
         nodes
@@ -142,11 +143,6 @@ impl Parser {
                         Node::Array(elements)
                     }
                 }
-            }
-            TokenType::LBrace => {
-                // map = { "a": 1, "b": 2, "c": 3 }
-
-                todo!()
             }
 
             TokenType::Op(Operator::Minus) => {
@@ -430,10 +426,7 @@ impl Parser {
                         }
                     }
                 }
-                TokenType::LBrace => {
-                    // todo: parse array
-                }
-                TokenType::LBracket => {
+                TokenType::LBrace => { // {
                     // parse blocks
                     if last_was_lit {
                         break;
@@ -442,6 +435,10 @@ impl Parser {
                     postfix.push(ShuntedStackItem::Operand(block));
                     last_op = None;
                     last_was_lit = true;
+                }
+                TokenType::LBracket => {
+                    // parse arrays
+                    todo!()
                 }
                 TokenType::Int(n) => {
                     if last_was_lit {

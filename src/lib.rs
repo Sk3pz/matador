@@ -10,7 +10,9 @@ mod variable;
 mod postfix;
 mod operator;
 mod scope;
+mod debug;
 
+pub const DEBUG_OUTPUT: bool = false;
 
 pub struct Matador {
     code: String,

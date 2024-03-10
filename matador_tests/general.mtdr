@@ -3,3 +3,7 @@ let s = "Test"
 let s1 = s[0]
 
 println s1
+
+if true {
+    println "true"
+}
