@@ -7,5 +7,5 @@ if x is int {
     println "x is not an integer"
 }
 
-let y = x as bool
+let y = x as string
 println y

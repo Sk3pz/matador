@@ -39,8 +39,9 @@ pub enum Node {
     Not,
 
     Print(Box<Node>, bool),
+    Sizeof(String),
     Read(VariableType),
-    Drop(Box<Node>),
+    Drop(String),
     EOF,
 }
 
@@ -115,6 +116,7 @@ impl Display for Node {
             Node::TypeCheck(node, typ) => write!(f, "CHECK {} IS {}", node, typ),
             Node::Read(typ) => write!(f, "READ {}", typ),
             Node::Print(node, newline) => write!(f, "PRINT {}{}", node, if *newline { "LN" } else { "" }),
+            Node::Sizeof(ident) => write!(f, "SIZEOF {}", ident),
             Node::Drop(node) => write!(f, "DROP {}", node),
             Node::EOF => write!(f, "EOF"),
         }

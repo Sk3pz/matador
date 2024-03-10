@@ -137,12 +137,17 @@ impl Interpreter {
                     }
                 }
             }
-            Node::Drop(node) => {
+            Node::Sizeof(ident) => {
+                let value = self.env.get_or_else(&ident);
+                value.sizeof().unwrap_or_else(|| {
+                    println!("{}Invalid sizeof: {}{:?}", Color::BrightRed, Color::Red, ident);
+                    flush_styles();
+                    std::process::exit(0);
+                })
+            }
+            Node::Drop(ident) => {
                 // drop the variable if it is one
-                if let Node::Ident(ident) = *node {
-                    println!("Dropping variable: {}", ident);
-                    self.env.remove(&ident);
-                }
+                self.env.remove(&ident);
                 Variable::Int(0)
             }
             Node::VarDecl(ident, typ) => {

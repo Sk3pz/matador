@@ -37,6 +37,7 @@ pub enum TokenType {
     ReadInt,
     ReadFloat,
     ReadBool,
+    Sizeof,
     Drop,
 
     // block outlines
@@ -195,6 +196,7 @@ impl<'a> Lexer<'a> {
             "readbool" => TokenType::ReadBool,
             "print" => TokenType::Print,
             "println" => TokenType::Println,
+            "sizeof" => TokenType::Sizeof,
             "drop" => TokenType::Drop,
 
             // blocks

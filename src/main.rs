@@ -11,8 +11,7 @@ mod postfix;
 mod operator;
 mod scope;
 
-
-const TEST_CODE: &str = include_str!("../matador_tests/general.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/type.mtdr");
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {
     let start = std::time::Instant::now();

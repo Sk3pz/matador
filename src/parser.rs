@@ -69,9 +69,13 @@ impl Parser {
                 let expr = self.next();
                 Node::Print(Box::new(expr), true)
             }
+            TokenType::Sizeof => {
+                let ident = self.consume_ident();
+                Node::Sizeof(ident)
+            }
             TokenType::Drop => {
-                let expr = self.consume_ident();
-                Node::Drop(Box::new(Node::Ident(expr)))
+                let ident = self.consume_ident();
+                Node::Drop(ident)
             }
             // todo: in keyword for ranges maps and arrays
             TokenType::Ident(ident) => {
@@ -219,6 +223,7 @@ impl Parser {
                 self.shunting_yard(Node::Not)
             }
 
+            // todo: this does not support `<literal> as <type>` statements
             TokenType::Int(n) => self.shunting_yard(Node::Variable(Variable::Int(*n))),
             TokenType::Float(n) => self.shunting_yard(Node::Variable(Variable::Float(*n))),
             TokenType::String(s) => self.shunting_yard(Node::Variable(Variable::String(s.clone()))),

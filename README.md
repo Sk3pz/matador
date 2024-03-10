@@ -67,7 +67,8 @@ Todo:
 - [x] printing
 - [x] conditionals (if/else)
 - [x] input
-- [x] type casting
+- [x] variable type casting
+- [ ] literal variable typecasting
 - [x] type checking
 - [ ] loops
   - [x] while

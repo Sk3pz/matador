@@ -327,6 +327,14 @@ impl Variable {
 
     pub fn access(&self, i: Variable) -> Option<Variable> {
         match (self, i) {
+            (Variable::String(s), Variable::Int(i)) => {
+                if i < 0 || i as usize >= s.len() {
+                    println!("{}Index out of range: {}{}", Color::BrightRed, Color::Red, i);
+                    flush_styles();
+                    std::process::exit(0);
+                }
+                Some(Variable::String(s.chars().nth(i as usize).unwrap().to_string()))
+            }
             (Variable::Array(a), Variable::Int(i)) => {
                 if i < 0 || i as usize >= a.len() {
                     println!("{}Index out of range: {}{}", Color::BrightRed, Color::Red, i);
@@ -351,6 +359,21 @@ impl Variable {
 
     pub fn assign(&mut self, i: Variable, v: Variable) -> Option<Variable> {
         match self {
+            Variable::String(s) => {
+                if let Variable::Int(i) = i {
+                    if i < 0 || i as usize >= s.len() {
+                        println!("{}Index out of range: {}{}", Color::BrightRed, Color::Red, i);
+                        flush_styles();
+                        std::process::exit(0);
+                    }
+                    let mut s = s.clone();
+                    s.remove(i as usize);
+                    s.insert(i as usize, v.to_string().unwrap().to_string().chars().next().unwrap());
+                    Some(Variable::String(s))
+                } else {
+                    None
+                }
+            }
             Variable::Array(a) => {
                 if let Variable::Int(i) = i {
                     if i < 0 || i as usize >= a.len() {
@@ -374,6 +397,15 @@ impl Variable {
                 a.push((Box::new(i), Box::new(v)));
                 Some(Variable::Map(a.clone()))
             }
+            _ => None,
+        }
+    }
+
+    pub fn sizeof(&self) -> Option<Variable> {
+        match self {
+            Variable::String(s) => Some(Variable::Int(s.len() as i64)),
+            Variable::Array(a) => Some(Variable::Int(a.len() as i64)),
+            Variable::Map(a) => Some(Variable::Int(a.len() as i64)),
             _ => None,
         }
     }
