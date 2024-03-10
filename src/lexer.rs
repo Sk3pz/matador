@@ -62,6 +62,7 @@ pub enum TokenType {
 pub struct Token {
     pub(crate) token_type: TokenType,
     lexeme: String,
+    pub pos: (usize, usize), // line, char
 }
 
 impl Display for Token {
@@ -74,6 +75,7 @@ pub struct Lexer<'a> {
     source: &'a str,
     chars: Vec<char>,
     pos: usize,
+    code_pos: (usize, usize),
 }
 
 impl<'a> Lexer<'a> {
@@ -82,6 +84,7 @@ impl<'a> Lexer<'a> {
             source,
             chars: source.chars().collect(),
             pos: 0,
+            code_pos: (1, 1),
         }
     }
 
@@ -89,7 +92,7 @@ impl<'a> Lexer<'a> {
         let mut tokens = Vec::new();
         while self.pos < self.chars.len() {
             let token = self.next_token();
-            //println!("{}: {:?}", tokens.len(), token);
+            println!("{}: {:?}", tokens.len(), token);
             tokens.push(token);
         }
         if let Some(last) = tokens.last() {
@@ -97,6 +100,7 @@ impl<'a> Lexer<'a> {
                 tokens.push(Token {
                     token_type: TokenType::EOF,
                     lexeme: "".to_string(),
+                    pos: self.code_pos,
                 });
             }
         }
@@ -109,6 +113,7 @@ impl<'a> Lexer<'a> {
         // iterate through chars until a pattern is found
         while self.pos < self.chars.len() {
             let c = self.chars[self.pos];
+            self.code_pos.1 += 1;
             // skip comments
             if c == '/' {
                 if self.pos + 1 < self.chars.len() && self.chars[self.pos + 1] == '/' {
@@ -172,6 +177,7 @@ impl<'a> Lexer<'a> {
                 return Token {
                     token_type: TokenType::EOF,
                     lexeme: "".to_string(),
+                    pos: self.code_pos,
                 };
             }
             return self.next_token();
@@ -283,11 +289,18 @@ impl<'a> Lexer<'a> {
         Token {
             token_type,
             lexeme: builder,
+            pos: self.code_pos,
         }
     }
 
     fn skip_whitespace(&mut self) {
         while self.pos < self.chars.len() && self.chars[self.pos].is_whitespace() {
+            if self.chars[self.pos] == '\n' {
+                self.code_pos.0 += 1;
+                self.code_pos.1 = 1;
+            } else {
+                self.code_pos.1 += 1;
+            }
             self.pos += 1;
         }
     }

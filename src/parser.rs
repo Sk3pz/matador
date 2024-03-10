@@ -20,7 +20,7 @@ impl Parser {
         let mut nodes = Vec::new();
         while self.pos < self.tokens.len() {
             nodes.push(self.next());
-            //println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
+            println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
             flush_styles()
         }
         nodes
@@ -31,12 +31,14 @@ impl Parser {
         self.pos += 1;
         match &token.token_type {
             TokenType::LBrace => {
-                let mut nodes = Vec::new();
-                while self.peek().token_type != TokenType::RBrace {
-                    nodes.push(self.next());
+                let block = self.parse_block();
+
+                // if there is a trailing operator, treat as an operand in the shunting yard
+                if self.should_shunt_from_lit() {
+                    self.shunting_yard(block)
+                } else {
+                    block
                 }
-                self.pos += 1;
-                Node::Block(nodes)
             }
 
             TokenType::Let => {
@@ -79,76 +81,13 @@ impl Parser {
             }
             // todo: in keyword for ranges maps and arrays
             TokenType::Ident(ident) => {
-                let ident = ident.clone();
-                if self.pos >= self.tokens.len() {
-                    return Node::Ident(ident);
-                }
-                match self.peek().token_type {
-                    TokenType::Assign => {
-                        self.pos += 1;
-                        let expr = self.next();
-                        Node::VarDecl(ident, Some(Box::new(expr)))
-                    }
-                    // array / map access and assignment
-                    TokenType::LBracket => {
-                        self.pos += 1;
-                        let index = self.next();
-                        // check for closing bracket
-                        if self.peek().token_type == TokenType::RBracket {
-                            self.pos += 1;
-                        } else {
-                            // invalid token, dump info and exit
-                            println!("{}Missing Right Bracket (']'), found: {}{:?}", Color::BrightRed, Color::Red, self.peek().token_type);
-                            flush_styles();
-                            std::process::exit(0);
-                        }
-                        if self.pos >= self.tokens.len() {
-                            return Node::ArrayMapAccess(ident, Box::new(index));
-                        }
-                        // handle assignment or access
-                        match self.peek().clone().token_type {
-                            TokenType::Assign => {
-                                self.pos += 1;
-                                let expr = self.next();
-                                Node::ArrayMapAssign(ident, Box::new(index), Box::new(expr))
-                            }
-                            _ => Node::ArrayMapAccess(ident, Box::new(index))
-                        }
-                    }
-                    TokenType::In => {
-                        todo!()
-                    }
-                    TokenType::As => {
-                        self.pos += 1;
-                        match self.peek().clone().token_type {
-                            TokenType::VariableType(typ) => {
-                                self.pos += 1;
-                                Node::TypeCast(Box::new(Node::Ident(ident)), typ.clone())
-                            }
-                            _ => {
-                                // invalid token, dump info and exit
-                                println!("{}Invalid token (as): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
-                                flush_styles();
-                                std::process::exit(0);
-                            }
-                        }
-                    }
-                    TokenType::Is => {
-                        self.pos += 1;
-                        match self.peek().clone().token_type {
-                            TokenType::VariableType(typ) => {
-                                self.pos += 1;
-                                Node::TypeCheck(Box::new(Node::Ident(ident)), typ.clone())
-                            }
-                            _ => {
-                                // invalid token, dump info and exit
-                                println!("{}Invalid token (is): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
-                                flush_styles();
-                                std::process::exit(0);
-                            }
-                        }
-                    }
-                    _ => self.shunting_yard(Node::Ident(ident))
+                let ident = self.parse_ident(ident.clone());
+
+                // if there is a trailing operator, treat as an operand in the shunting yard
+                if self.should_shunt_from_lit() {
+                    self.shunting_yard(ident)
+                } else {
+                    ident
                 }
             },
 
@@ -232,10 +171,107 @@ impl Parser {
             TokenType::EOF => Node::EOF,
             _ => {
                 // invalid token, dump info and exit
-                println!("{}Invalid token: {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                println!("{}Invalid token: {}{:?} @ {:?}", Color::BrightRed, Color::Red, token.token_type, token.pos);
                 flush_styles();
                 std::process::exit(0);
             }
+        }
+    }
+
+    pub fn should_shunt_from_lit(&self) -> bool {
+        if self.pos < self.tokens.len() {
+            match self.peek().token_type {
+                TokenType::Op(_) => {
+                    true
+                }
+                _ => false,
+            }
+        } else {
+            false
+        }
+    }
+
+    pub fn parse_block(&mut self) -> Node {
+        let mut nodes = Vec::new();
+        while self.peek().token_type != TokenType::RBrace {
+            nodes.push(self.next());
+        }
+        self.pos += 1;
+        Node::Block(nodes)
+    }
+
+    pub fn parse_ident(&mut self, ident: String) -> Node {
+        let token = &self.tokens[self.pos];
+        let ident = ident.clone();
+        if self.pos >= self.tokens.len() {
+            return Node::Ident(ident);
+        }
+        match self.peek().token_type {
+            TokenType::Assign => {
+                self.pos += 1;
+                let expr = self.next();
+                Node::VarDecl(ident, Some(Box::new(expr)))
+            }
+            // array / map access and assignment
+            TokenType::LBracket => {
+                self.pos += 1;
+                let index = self.next();
+                // check for closing bracket
+                if self.peek().token_type == TokenType::RBracket {
+                    self.pos += 1;
+                } else {
+                    // invalid token, dump info and exit
+                    println!("{}Missing Right Bracket (']'), found: {}{:?} @ {:?}", Color::BrightRed, Color::Red, self.peek().token_type, self.peek().pos);
+                    flush_styles();
+                    std::process::exit(0);
+                }
+                if self.pos >= self.tokens.len() {
+                    return Node::ArrayMapAccess(ident, Box::new(index));
+                }
+                // handle assignment or access
+                match self.peek().clone().token_type {
+                    TokenType::Assign => {
+                        self.pos += 1;
+                        let expr = self.next();
+                        Node::ArrayMapAssign(ident, Box::new(index), Box::new(expr))
+                    }
+                    _ => Node::ArrayMapAccess(ident, Box::new(index))
+                }
+            }
+            TokenType::In => {
+                todo!()
+            }
+            TokenType::As => {
+                self.pos += 1;
+                match self.peek().clone().token_type {
+                    TokenType::VariableType(typ) => {
+                        self.pos += 1;
+                        Node::TypeCast(Box::new(Node::Ident(ident)), typ.clone())
+                    }
+                    _ => {
+                        // invalid token, dump info and exit
+                        println!("{}Invalid token (as): {}{:?} @ {:?}", Color::BrightRed, Color::Red, token.token_type, token.pos);
+                        flush_styles();
+                        std::process::exit(0);
+                    }
+                }
+            }
+            TokenType::Is => {
+                self.pos += 1;
+                match self.peek().clone().token_type {
+                    TokenType::VariableType(typ) => {
+                        self.pos += 1;
+                        Node::TypeCheck(Box::new(Node::Ident(ident)), typ.clone())
+                    }
+                    _ => {
+                        // invalid token, dump info and exit
+                        println!("{}Invalid token (is): {}{:?} @ {:?}", Color::BrightRed, Color::Red, token.token_type, token.pos);
+                        flush_styles();
+                        std::process::exit(0);
+                    }
+                }
+            }
+            _ => Node::Ident(ident)
         }
     }
 
@@ -246,7 +282,7 @@ impl Parser {
             TokenType::Ident(ident) => ident.clone(),
             _ => {
                 // invalid token, dump info and exit
-                println!("{}Invalid token (ci): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                println!("{}Invalid token (ci): {}{:?} @ {:?}", Color::BrightRed, Color::Red, token.token_type, token.pos);
                 flush_styles();
                 std::process::exit(0);
             }
@@ -273,7 +309,7 @@ impl Parser {
             }
             if self.peek().token_type != TokenType::Comma {
                 // invalid token, dump info and exit
-                println!("{}Invalid parameter: {}{:?}", Color::BrightRed, Color::Red, self.peek().token_type);
+                println!("{}Invalid parameter: {}{:?} @ {:?}", Color::BrightRed, Color::Red, self.peek().token_type, self.peek().pos);
                 flush_styles();
                 std::process::exit(0);
             }
@@ -307,10 +343,15 @@ impl Parser {
                 op_stack.push(Operator::LParen);
                 last_op = Some(Operator::LParen);
             }
+            // _ => {
+            //     println!("{}Invalid token (as): {}{}", Color::BrightRed, Color::Red, lhs);
+            //     flush_styles();
+            //     std::process::exit(0);
+            // }
+            // add all others to the stack, assume parser knows best
             _ => {
-                println!("{}Invalid token (as): {}{}", Color::BrightRed, Color::Red, lhs);
-                flush_styles();
-                std::process::exit(0);
+                postfix.push(ShuntedStackItem::Operand(lhs));
+                last_was_lit = true;
             }
         }
 
@@ -324,7 +365,7 @@ impl Parser {
                             op_stack.push(op.clone());
                             if last_was_lit {
                                 // error: missing operator
-                                println!("{}Invalid token (aslp): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                                println!("{}Invalid token (aslp): {}{:?} @ {:?}", Color::BrightRed, Color::Red, token.token_type, token.pos);
                                 flush_styles();
                                 std::process::exit(0);
                             }
@@ -345,7 +386,7 @@ impl Parser {
 
                             if !found {
                                 // error: missing left parenthesis
-                                println!("{}Invalid token (asrp): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                                println!("{}Invalid token (asrp): {}{:?} @ {:?}", Color::BrightRed, Color::Red, token.token_type, token.pos);
                                 flush_styles();
                                 std::process::exit(0);
                             }
@@ -389,6 +430,19 @@ impl Parser {
                         }
                     }
                 }
+                TokenType::LBrace => {
+                    // todo: parse array
+                }
+                TokenType::LBracket => {
+                    // parse blocks
+                    if last_was_lit {
+                        break;
+                    }
+                    let block = self.parse_block();
+                    postfix.push(ShuntedStackItem::Operand(block));
+                    last_op = None;
+                    last_was_lit = true;
+                }
                 TokenType::Int(n) => {
                     if last_was_lit {
                         break;
@@ -406,10 +460,12 @@ impl Parser {
                     last_was_lit = true;
                 }
                 TokenType::Ident(ident) => {
+                    // parse the ident
                     if last_was_lit {
                         break;
                     }
-                    postfix.push(ShuntedStackItem::Operand(Node::Ident(ident.clone())));
+                    let ident = self.parse_ident(ident.clone());
+                    postfix.push(ShuntedStackItem::Operand(ident.clone()));
                     last_op = None;
                     last_was_lit = true;
                 }
