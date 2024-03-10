@@ -1,3 +1,10 @@
+/*
+    A brainfuck interpreter written in Matador
+    Written by Brad (Beastwick18) <https://github.com/Beastwick18>
+
+    Note: this currently does not function properly
+*/
+
 // input = ["-", "-", "[", "+", "+", "+", "+", "+", "+", "+", ">", "-", "-", ">", "+", ">", "+", ">", "+", "<", "<", "<", "-", ">", "-", "-", "-", ".", ">", "-", "-", ".", ".", ">", "+", ".", "<", "<", "<", ".", "+", ">", "-", ">", ">", ".", "+", "+", "+", "[", ".", "<", "]"]
 let input = "--[+++++++>-->+>+>+<<<->---.>--..>+.<<<.+>->>.+++[.<]"
 let len = sizeof input
