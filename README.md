@@ -104,14 +104,16 @@ Todo:
 - [x] scopes
   - [x] global (lives for lifetime of program unless dropped)
   - [x] local / block (lives for lifetime of block unless dropped)
-- [ ] functions
-  - [ ] replace built in keywords like readln and print with functions
 - [x] arrays
 - [ ] maps
 - [ ] ranges
+- [ ] inc / dec operators (++ / --)
+- [ ] Assign and operate operators (+=, -=, *=, /=, %=)
+- [ ] functions
+  - [ ] replace built in keywords like readln and print with functions
 - [ ] structs
 - [ ] multi-file support
-- [ ] loading and running other matador programs
+- [ ] loading and running other matador programs (maybe done through a function call)
 - [ ] expose API for creating libraries
 - [ ] expose lexer for linting and syntax highlighting
 - [ ] optimize and refactor
