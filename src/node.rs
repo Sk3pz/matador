@@ -36,6 +36,7 @@ pub enum Node {
     // arithmetic
     Expression, // ( ... )
     Negative,
+    Not,
 
     Print(Box<Node>, bool),
     Read(VariableType),
@@ -57,6 +58,7 @@ impl Display for Node {
             Node::Variable(n) => write!(f, "LIT {}", n),
             Node::Ident(ident) => write!(f, "IDENT '{}'", ident),
             Node::Negative => write!(f, "NEG"),
+            Node::Not => write!(f, "NOT"),
             Node::Expression => write!(f, "EXPR"),
             Node::ShuntedStack(stack) => write!(f, "STACK({:?})", stack),
             Node::Block(nodes) => {

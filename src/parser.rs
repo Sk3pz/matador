@@ -215,6 +215,10 @@ impl Parser {
                 self.shunting_yard(Node::Expression)
             }
 
+            TokenType::Op(Operator::Not) => {
+                self.shunting_yard(Node::Not)
+            }
+
             TokenType::Int(n) => self.shunting_yard(Node::Variable(Variable::Int(*n))),
             TokenType::Float(n) => self.shunting_yard(Node::Variable(Variable::Float(*n))),
             TokenType::String(s) => self.shunting_yard(Node::Variable(Variable::String(s.clone()))),
@@ -290,6 +294,10 @@ impl Parser {
             Node::Negative => {
                 negative = true;
             }
+            Node::Not => {
+                op_stack.push(Operator::Not);
+                last_op = Some(Operator::Not);
+            }
             Node::Expression => {
                 op_stack.push(Operator::LParen);
                 last_op = Some(Operator::LParen);
@@ -351,13 +359,13 @@ impl Parser {
                             last_op = Some(op.clone());
                             last_was_lit = false;
                         }
+                        Operator::Not => {
+                            op_stack.push(op.clone());
+                            last_op = Some(op.clone());
+                            last_was_lit = false;
+                            negative = false;
+                        }
                         _ => {
-                            if last_op.is_some() {
-                                // error: two operators in a row
-                                println!("{}Invalid token (lastop): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
-                                flush_styles();
-                                std::process::exit(0);
-                            }
                             last_op = Some(op.clone());
                             last_was_lit = false;
                             negative = false;

@@ -223,6 +223,7 @@ impl Variable {
 
     pub fn not(&self) -> Option<Variable> {
         match self {
+            Variable::Int(a) => Some(Variable::Int(!*a)),
             Variable::Bool(a) => Some(Variable::Bool(!*a)),
             _ => None,
         }

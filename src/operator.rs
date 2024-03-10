@@ -93,11 +93,19 @@ impl Operator {
         }
     }
 
+    pub fn is_unary(&self) -> bool {
+        match self {
+            Operator::Inc | Operator::Dec | Operator::Minus | Operator::Not => true,
+            _ => false,
+        }
+    }
+
     pub fn apply_unary(&self, left: Variable) -> Option<Variable> {
         match self {
             Operator::Inc => left.inc(),
             Operator::Dec => left.dec(),
             Operator::Minus => left.neg(),
+            Operator::Not => left.not(),
             _ => None,
         }
     }

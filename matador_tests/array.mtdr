@@ -7,3 +7,7 @@ arr[2] = 4
 println "updated arr: " + arr
 
 println arr[2]
+
+if !false {
+    println "hi"
+}
