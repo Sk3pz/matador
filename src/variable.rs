@@ -58,6 +58,13 @@ impl Variable {
                 Some(Variable::Array(arr))
             }
 
+            // adding an element to an array
+            (Variable::Array(a), b) => {
+                let mut arr = a.clone();
+                arr.push(Box::new(b.clone()));
+                Some(Variable::Array(arr))
+            }
+
             // adding maps
             (Variable::Map(a), Variable::Map(b)) => {
                 let mut map = a.clone();
