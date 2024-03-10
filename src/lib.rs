@@ -1,14 +1,15 @@
+// this is for embedding matador in other programs
 use crate::lexer::Lexer;
 use crate::parser::Parser;
 
 mod parser;
 mod node;
-mod scope;
 mod interpreter;
 mod lexer;
 mod variable;
 mod postfix;
 mod operator;
+mod scope;
 
 
 pub struct Matador {
