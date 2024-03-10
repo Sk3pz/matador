@@ -140,9 +140,18 @@ impl<'a> Lexer<'a> {
 
             // handle leading single character tokens
             // todo: this probably wont allow x =1, and would treat =1 as an identifier
-            if c == '(' || c == '!' {
+            if c == '(' {
                 builder.push(c);
                 self.pos += 1;
+                break;
+            }
+
+            if c == '!' && self.pos + 1 < self.chars.len() && self.chars[self.pos + 1] == '=' {
+                if !builder.is_empty() {
+                    break;
+                }
+                builder.push_str("!=");
+                self.pos += 2;
                 break;
             }
 
@@ -214,7 +223,6 @@ impl<'a> Lexer<'a> {
             // operators
             "(" => TokenType::Op(Operator::LParen),
             ")" => TokenType::Op(Operator::RParen),
-            ")" => TokenType::RParen,
             "+" => TokenType::Op(Operator::Plus),
             "-" => TokenType::Op(Operator::Minus),
             "*" => TokenType::Op(Operator::Mul),
