@@ -97,10 +97,10 @@ Todo:
   - [ ] for
   - [ ] break
   - [ ] continue
-- [ ] boolean logic
+- [x] boolean logic
   - [x] and
   - [x] or
-  - [ ] leading not
+  - [x] leading not
 - [x] scopes
   - [x] global (lives for lifetime of program unless dropped)
   - [x] local / block (lives for lifetime of block unless dropped)
