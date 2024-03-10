@@ -9,9 +9,10 @@ mod lexer;
 mod literal;
 mod postfix;
 mod operator;
+mod scope;
 
 
-const TEST_CODE: &str = include_str!("../matador_tests/fizzbuzz.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/block_test.mtdr");
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {
     let start = std::time::Instant::now();

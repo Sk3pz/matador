@@ -23,6 +23,7 @@ impl Display for StaticType {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+// todo: convert to Variable, and add arrays and maps
 pub enum Literal {
     Int(i64),
     Float(f64),

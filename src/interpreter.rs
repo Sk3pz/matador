@@ -1,26 +1,18 @@
-use std::collections::HashMap;
 use better_term::{Color, flush_styles, read_input};
 use crate::literal::{Literal, StaticType};
 use crate::node::Node;
 use crate::postfix::ShuntedStackItem;
+use crate::scope::ScopeHandler;
 
 pub struct Interpreter {
-    env: HashMap<String, Literal>,
+    env: ScopeHandler,
 }
 
 impl Interpreter {
     pub fn new() -> Self {
         Interpreter {
-            env: HashMap::new(),
+            env: ScopeHandler::new(),
         }
-    }
-
-    fn get_var(&self, ident: &str) -> &Literal {
-        self.env.get(ident).unwrap_or_else(|| {
-            println!("{}Undefined variable: {}{}", Color::BrightRed, Color::Red, ident);
-            flush_styles();
-            std::process::exit(0);
-        })
     }
 
     pub fn interpret(&mut self, nodes: Vec<Node>) {
@@ -34,9 +26,13 @@ impl Interpreter {
             Node::Literal(n) => n,
             Node::Block(nodes) => {
                 let mut last = Literal::Int(0);
+                // create a new scope
+                self.env.push_scope();
                 for node in nodes {
                     last = self.eval(node);
                 }
+                // remove the scope
+                self.env.pop_scope();
                 last
             }
             Node::ShuntedStack(stack) => {
@@ -101,7 +97,7 @@ impl Interpreter {
                 operand_stack.pop().unwrap()
             }
             Node::Ident(ident) => {
-                self.get_var(&ident).clone()
+                self.env.get_or_else(&ident).clone()
             },
             Node::Print(node, newline) => {
                 print!("{}{}", self.eval(*node), if newline { "\n" } else { "" });
@@ -145,14 +141,14 @@ impl Interpreter {
             }
             Node::VarDecl(ident, typ) => {
                 let value = typ.map_or(Literal::Int(0), |n| self.eval(*n));
-                self.env.insert(ident, value.clone());
+                self.env.set(&ident, value.clone());
                 value
             }
             Node::TypeCast(ident, typ) => {
                 match *ident {
                     Node::Ident(s) => {
                         // change the type of the variable
-                        let value = self.get_var(&s);
+                        let value = self.env.get_or_else(&s);
                         // cast the value to the new type
                         match typ {
                             StaticType::Int => {
@@ -183,9 +179,9 @@ impl Interpreter {
                 match *ident {
                     Node::Ident(s) => {
                         // check the type of the variable
-                        let value = self.get_var(&s);
+                        let value = self.env.get_or_else(&s);
                         // check if the value is of the correct type
-                        match *value {
+                        match value {
                             Literal::Int(_) => {
                                 if typ == StaticType::Int {
                                     Literal::Bool(true)
@@ -258,7 +254,7 @@ impl Interpreter {
                 }
             }
             Node::While(cond, body) => {
-                let mut last = Literal::Int(0);
+                let last = Literal::Int(0);
                 loop {
                     // evaluate condition
                     let condition = self.eval(*cond.clone()).to_bool();

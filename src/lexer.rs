@@ -81,10 +81,6 @@ impl<'a> Lexer<'a> {
             //println!("{:?}", token);
             tokens.push(token);
         }
-        tokens.push(Token {
-            token_type: TokenType::EOF,
-            lexeme: "".to_string(),
-        });
         tokens
     }
 
@@ -143,6 +139,12 @@ impl<'a> Lexer<'a> {
         }
         if builder.is_empty() {
             // handle cases where it exits the loop without adding anything to the builder
+            if self.pos >= self.chars.len() {
+                return Token {
+                    token_type: TokenType::EOF,
+                    lexeme: "".to_string(),
+                };
+            }
             return self.next_token();
         }
         let token_type = match &builder[..] {

@@ -1,0 +1,8 @@
+let x = {
+    let y = 2 ** 2
+    println y
+    y
+}
+
+println x
+

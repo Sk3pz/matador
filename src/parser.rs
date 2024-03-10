@@ -1,4 +1,3 @@
-use std::fmt::Display;
 use better_term::{Color, flush_styles};
 use crate::lexer::{Token, TokenType};
 use crate::operator::Operator;

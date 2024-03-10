@@ -3,6 +3,7 @@ use crate::parser::Parser;
 
 mod parser;
 mod node;
+mod scope;
 mod interpreter;
 mod lexer;
 mod literal;

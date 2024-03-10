@@ -101,6 +101,9 @@ Todo:
   - [x] and
   - [x] or
   - [ ] leading not
+- [x] scopes
+  - [x] global (lives for lifetime of program unless dropped)
+  - [x] local / block (lives for lifetime of block unless dropped)
 - [ ] functions
   - [ ] replace built in keywords like readln and print with functions
 - [ ] arrays
