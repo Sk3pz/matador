@@ -20,7 +20,7 @@ impl Parser {
         let mut nodes = Vec::new();
         while self.pos < self.tokens.len() {
             nodes.push(self.next());
-            println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
+            //println!("{}Parsed: {}", Color::BrightGreen, nodes.last().unwrap());
             flush_styles()
         }
         nodes
