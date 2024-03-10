@@ -84,7 +84,7 @@ impl<'a> Lexer<'a> {
             source,
             chars: source.chars().collect(),
             pos: 0,
-            code_pos: (1, 1),
+            code_pos: (1, 0),
         }
     }
 
@@ -107,28 +107,32 @@ impl<'a> Lexer<'a> {
         tokens
     }
 
+    fn update_code_pos(&mut self, amt: usize) {
+        self.code_pos.1 += amt;
+        self.pos += amt;
+    }
+
     fn next_token(&mut self) -> Token {
         self.skip_whitespace();
         let mut builder = String::new();
         // iterate through chars until a pattern is found
         while self.pos < self.chars.len() {
             let c = self.chars[self.pos];
-            self.code_pos.1 += 1;
             // skip comments
             if c == '/' {
                 if self.pos + 1 < self.chars.len() && self.chars[self.pos + 1] == '/' {
                     while self.pos < self.chars.len() && self.chars[self.pos] != '\n' {
-                        self.pos += 1;
+                        self.update_code_pos(1);
                     }
                     continue;
                 } else if self.pos + 1 < self.chars.len() && self.chars[self.pos + 1] == '*' {
-                    self.pos += 2;
+                    self.update_code_pos(2);
                     while self.pos < self.chars.len() {
                         if self.chars[self.pos] == '*' && self.pos + 1 < self.chars.len() && self.chars[self.pos + 1] == '/' {
-                            self.pos += 2;
+                            self.update_code_pos(2);
                             break;
                         }
-                        self.pos += 1;
+                        self.update_code_pos(1);
                     }
                     continue;
                 }
@@ -139,7 +143,7 @@ impl<'a> Lexer<'a> {
                     break;
                 }
                 builder.push(c);
-                self.pos += 1;
+                self.update_code_pos(1);
                 break;
             }
 
@@ -147,7 +151,7 @@ impl<'a> Lexer<'a> {
             // todo: this probably wont allow x =1, and would treat =1 as an identifier
             if c == '(' {
                 builder.push(c);
-                self.pos += 1;
+                self.update_code_pos(1);
                 break;
             }
 
@@ -156,7 +160,7 @@ impl<'a> Lexer<'a> {
                     break;
                 }
                 builder.push_str("!=");
-                self.pos += 2;
+                self.update_code_pos(2);
                 break;
             }
 
@@ -164,7 +168,7 @@ impl<'a> Lexer<'a> {
                 break;
             }
             builder.push(c);
-            self.pos += 1;
+            self.update_code_pos(1);
 
             // handle multi-character modifiers
             if builder == "++" || builder == "--" {
@@ -268,9 +272,9 @@ impl<'a> Lexer<'a> {
                 } else {
                     while self.pos < self.chars.len() && self.chars[self.pos] != '"' {
                         builder.push(self.chars[self.pos]);
-                        self.pos += 1;
+                        self.update_code_pos(1);
                     }
-                    self.pos += 1;
+                    self.update_code_pos(1);
                     TokenType::String(builder.clone())
                 }
             },
@@ -297,7 +301,7 @@ impl<'a> Lexer<'a> {
         while self.pos < self.chars.len() && self.chars[self.pos].is_whitespace() {
             if self.chars[self.pos] == '\n' {
                 self.code_pos.0 += 1;
-                self.code_pos.1 = 1;
+                self.code_pos.1 = 0;
             } else {
                 self.code_pos.1 += 1;
             }
