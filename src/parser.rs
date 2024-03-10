@@ -1,7 +1,7 @@
 use better_term::{Color, flush_styles};
 use crate::lexer::{Token, TokenType};
 use crate::operator::Operator;
-use crate::literal::{Literal, StaticType};
+use crate::variable::{Variable, VariableType};
 use crate::node::Node;
 use crate::postfix::{ShuntedStack, ShuntedStackItem};
 
@@ -50,16 +50,16 @@ impl Parser {
                 }
             }
             TokenType::ReadStr => {
-                Node::Read(StaticType::String)
+                Node::Read(VariableType::String)
             }
             TokenType::ReadInt => {
-                Node::Read(StaticType::Int)
+                Node::Read(VariableType::Int)
             }
             TokenType::ReadFloat => {
-                Node::Read(StaticType::Float)
+                Node::Read(VariableType::Float)
             }
             TokenType::ReadBool => {
-                Node::Read(StaticType::Bool)
+                Node::Read(VariableType::Bool)
             }
             TokenType::Print => {
                 let expr = self.next();
@@ -73,18 +73,51 @@ impl Parser {
                 let expr = self.next();
                 Node::Drop(Box::new(expr))
             }
+            // todo: in keyword for ranges maps and arrays
             TokenType::Ident(ident) => {
                 let ident = ident.clone();
+                if self.pos >= self.tokens.len() {
+                    return Node::Ident(ident);
+                }
                 match self.peek().token_type {
                     TokenType::Assign => {
                         self.pos += 1;
                         let expr = self.next();
                         Node::VarDecl(ident, Some(Box::new(expr)))
                     }
+                    // array / map access and assignment
+                    TokenType::LBracket => {
+                        self.pos += 1;
+                        let index = self.next();
+                        // check for closing bracket
+                        if self.peek().token_type == TokenType::RBracket {
+                            self.pos += 1;
+                        } else {
+                            // invalid token, dump info and exit
+                            println!("{}Missing Right Bracket (']'), found: {}{:?}", Color::BrightRed, Color::Red, self.peek().token_type);
+                            flush_styles();
+                            std::process::exit(0);
+                        }
+                        if self.pos >= self.tokens.len() {
+                            return Node::ArrayMapAccess(ident, Box::new(index));
+                        }
+                        // handle assignment or access
+                        match self.peek().clone().token_type {
+                            TokenType::Assign => {
+                                self.pos += 1;
+                                let expr = self.next();
+                                Node::ArrayMapAssign(ident, Box::new(index), Box::new(expr))
+                            }
+                            _ => Node::ArrayMapAccess(ident, Box::new(index))
+                        }
+                    }
+                    TokenType::In => {
+                        todo!()
+                    }
                     TokenType::As => {
                         self.pos += 1;
                         match self.peek().clone().token_type {
-                            TokenType::StaticType(typ) => {
+                            TokenType::VariableType(typ) => {
                                 self.pos += 1;
                                 Node::TypeCast(Box::new(Node::Ident(ident)), typ.clone())
                             }
@@ -99,7 +132,7 @@ impl Parser {
                     TokenType::Is => {
                         self.pos += 1;
                         match self.peek().clone().token_type {
-                            TokenType::StaticType(typ) => {
+                            TokenType::VariableType(typ) => {
                                 self.pos += 1;
                                 Node::TypeCheck(Box::new(Node::Ident(ident)), typ.clone())
                             }
@@ -137,16 +170,39 @@ impl Parser {
                 let block = Box::new(self.next());
                 Node::While(cond, block)
             }
+            TokenType::Loop => {
+                // get the block
+                let block = Box::new(self.next());
+                Node::Loop(block)
+            }
             TokenType::For => {
                 todo!()
             }
             TokenType::Break => {
-                todo!()
+                Node::Break
             }
             TokenType::Continue => {
-                todo!()
+                Node::Continue
             }
-            TokenType::In => {
+
+            // arrays and maps
+            TokenType::LBracket => {
+                // array = [1, 2, 3]
+                match self.peek().token_type {
+                    TokenType::RBracket => {
+                        self.pos += 1;
+                        Node::Variable(Variable::Array(Vec::new()))
+                    }
+                    _ => {
+                        // array with elements
+                        let elements = self.parse_params(TokenType::RBracket);
+                        Node::Array(elements)
+                    }
+                }
+            }
+            TokenType::LBrace => {
+                // map = { "a": 1, "b": 2, "c": 3 }
+
                 todo!()
             }
 
@@ -159,10 +215,10 @@ impl Parser {
                 self.shunting_yard(Node::Expression)
             }
 
-            TokenType::Int(n) => self.shunting_yard(Node::Literal(Literal::Int(*n))),
-            TokenType::Float(n) => self.shunting_yard(Node::Literal(Literal::Float(*n))),
-            TokenType::String(s) => self.shunting_yard(Node::Literal(Literal::String(s.clone()))),
-            TokenType::Bool(b) => self.shunting_yard(Node::Literal(Literal::Bool(*b))),
+            TokenType::Int(n) => self.shunting_yard(Node::Variable(Variable::Int(*n))),
+            TokenType::Float(n) => self.shunting_yard(Node::Variable(Variable::Float(*n))),
+            TokenType::String(s) => self.shunting_yard(Node::Variable(Variable::String(s.clone()))),
+            TokenType::Bool(b) => self.shunting_yard(Node::Variable(Variable::Bool(*b))),
 
             TokenType::EOF => Node::EOF,
             _ => {
@@ -188,6 +244,35 @@ impl Parser {
         }
     }
 
+    // parse parameters separated by commas
+    // possible variants with end of ')'
+    // 1. a, b, ...)
+    // 2. a)
+    // 3. )
+    fn parse_params(&mut self, end: TokenType) -> Vec<Box<Node>> {
+        let mut params = Vec::new();
+        // if the next token is the end token, then there are no parameters
+        if self.peek().token_type == end {
+            self.pos += 1;
+            return params;
+        }
+        loop {
+            params.push(Box::new(self.next()));
+            if self.peek().token_type == end {
+                self.pos += 1;
+                break;
+            }
+            if self.peek().token_type != TokenType::Comma {
+                // invalid token, dump info and exit
+                println!("{}Invalid parameter: {}{:?}", Color::BrightRed, Color::Red, self.peek().token_type);
+                flush_styles();
+                std::process::exit(0);
+            }
+            self.pos += 1;
+        }
+        params
+    }
+
     // todo: trailing ++ or -- can cause issues
     fn shunting_yard(&mut self, lhs: Node) -> Node {
         let mut postfix = ShuntedStack::new();
@@ -198,7 +283,7 @@ impl Parser {
         let mut last_was_lit = false;
 
         match lhs {
-            Node::Literal(_) | Node::Ident(_) => {
+            Node::Variable(_) | Node::Ident(_) => {
                 postfix.push(ShuntedStackItem::Operand(lhs));
                 last_was_lit = true;
             }
@@ -269,7 +354,7 @@ impl Parser {
                         _ => {
                             if last_op.is_some() {
                                 // error: two operators in a row
-                                println!("{}Invalid token (astop): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
+                                println!("{}Invalid token (lastop): {}{:?}", Color::BrightRed, Color::Red, token.token_type);
                                 flush_styles();
                                 std::process::exit(0);
                             }
@@ -295,7 +380,7 @@ impl Parser {
                     if last_was_lit {
                         break;
                     }
-                    postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Int(*n))));
+                    postfix.push(ShuntedStackItem::Operand(Node::Variable(Variable::Int(*n))));
                     last_op = None;
                     last_was_lit = true;
                 }
@@ -303,7 +388,7 @@ impl Parser {
                     if last_was_lit {
                         break;
                     }
-                    postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Float(*n))));
+                    postfix.push(ShuntedStackItem::Operand(Node::Variable(Variable::Float(*n))));
                     last_op = None;
                     last_was_lit = true;
                 }
@@ -319,7 +404,7 @@ impl Parser {
                     if last_was_lit {
                         break;
                     }
-                    postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::Bool(*b))));
+                    postfix.push(ShuntedStackItem::Operand(Node::Variable(Variable::Bool(*b))));
                     last_op = None;
                     last_was_lit = true;
                 }
@@ -327,7 +412,7 @@ impl Parser {
                     if last_was_lit {
                         break;
                     }
-                    postfix.push(ShuntedStackItem::Operand(Node::Literal(Literal::String(s.clone()))));
+                    postfix.push(ShuntedStackItem::Operand(Node::Variable(Variable::String(s.clone()))));
                     last_op = None;
                     last_was_lit = true;
                 }

@@ -93,7 +93,7 @@ Todo:
 - [x] type checking
 - [ ] loops
   - [x] while
-  - [ ] loop
+  - [x] loop
   - [ ] for
   - [ ] break
   - [ ] continue
@@ -106,7 +106,7 @@ Todo:
   - [x] local / block (lives for lifetime of block unless dropped)
 - [ ] functions
   - [ ] replace built in keywords like readln and print with functions
-- [ ] arrays
+- [x] arrays
 - [ ] maps
 - [ ] ranges
 - [ ] structs

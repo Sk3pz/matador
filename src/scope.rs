@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use better_term::{Color, flush_styles};
-use crate::literal::Literal;
+use crate::variable::Variable;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 struct Scope {
-    variables: HashMap<String, Literal>,
+    variables: HashMap<String, Variable>,
 }
 
 impl Scope {
@@ -14,15 +14,15 @@ impl Scope {
         }
     }
 
-    fn set(&mut self, ident: &str, value: Literal) {
+    fn set(&mut self, ident: &str, value: Variable) {
         self.variables.insert(ident.to_string(), value);
     }
 
-    fn get(&self, ident: &str) -> Option<&Literal> {
+    fn get(&self, ident: &str) -> Option<&Variable> {
         self.variables.get(ident)
     }
 
-    fn get_or_else(&self, ident: &str) -> Literal {
+    fn get_or_else(&self, ident: &str) -> Variable {
         self.variables.get(ident).unwrap_or_else(|| {
             println!("{}Undefined variable: {}{}", Color::BrightRed, Color::Red, ident);
             flush_styles();
@@ -35,7 +35,7 @@ impl Scope {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct ScopeHandler {
     scopes: Vec<Scope>,
 }
@@ -55,7 +55,7 @@ impl ScopeHandler {
         self.scopes.pop();
     }
 
-    pub fn set(&mut self, ident: &str, value: Literal) {
+    pub fn set(&mut self, ident: &str, value: Variable) {
         // set a variable in one of the scopes
         for scope in self.scopes.iter_mut().rev() {
             if scope.get(ident).is_some() {
@@ -68,7 +68,7 @@ impl ScopeHandler {
         self.scopes.last_mut().unwrap().set(ident, value);
     }
 
-    pub fn get(&self, ident: &str) -> Option<&Literal> {
+    pub fn get(&self, ident: &str) -> Option<&Variable> {
         for scope in self.scopes.iter().rev() {
             if let Some(value) = scope.get(ident) {
                 return Some(value);
@@ -77,7 +77,7 @@ impl ScopeHandler {
         None
     }
 
-    pub fn get_or_else(&self, ident: &str) -> Literal {
+    pub fn get_or_else(&self, ident: &str) -> Variable {
         for scope in self.scopes.iter().rev() {
             if let Some(value) = scope.get(ident) {
                 return value.clone();

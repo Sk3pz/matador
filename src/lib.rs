@@ -6,7 +6,7 @@ mod node;
 mod scope;
 mod interpreter;
 mod lexer;
-mod literal;
+mod variable;
 mod postfix;
 mod operator;
 

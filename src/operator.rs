@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use crate::literal::Literal;
+use crate::variable::Variable;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Operator {
@@ -14,18 +14,13 @@ pub enum Operator {
     Dec,    // --
 
     // misc
-    Decimal, // .
     Range,   // ..
-
-    // control flow
-    LParen,   // (
-    RParen,   // )
-    LBracket, // [
-    RBracket, // ]
+    LParen, // (
+    RParen, // )
 
     // bitwise
-    BitAnd,    // &
-    BitOr,     // |
+    BitAnd, // &
+    BitOr,  // |
     Xor,    // ^
     Not,    // !
     LShift, // <<
@@ -60,14 +55,12 @@ impl Operator {
 
     pub fn can_apply(&self) -> bool {
         match self {
-            Operator::Decimal | Operator::Range |
-            Operator::LParen | Operator::RParen |
-            Operator::LBracket | Operator::RBracket => false,
+            Operator::Range  => false,
             _ => true,
         }
     }
 
-    pub fn apply_binary(&self, left: Literal, right: Literal) -> Option<Literal> {
+    pub fn apply_binary(&self, left: Variable, right: Variable) -> Option<Variable> {
         match self {
             // standard
             Operator::Plus => left.add(&right),
@@ -100,7 +93,7 @@ impl Operator {
         }
     }
 
-    pub fn apply_unary(&self, left: Literal) -> Option<Literal> {
+    pub fn apply_unary(&self, left: Variable) -> Option<Variable> {
         match self {
             Operator::Inc => left.inc(),
             Operator::Dec => left.dec(),
@@ -121,12 +114,9 @@ impl Display for Operator {
             Operator::Pow => "**",
             Operator::Inc => "++",
             Operator::Dec => "--",
-            Operator::Decimal => ".",
-            Operator::Range => "..",
             Operator::LParen => "(",
             Operator::RParen => ")",
-            Operator::LBracket => "[",
-            Operator::RBracket => "]",
+            Operator::Range => "..",
             Operator::BitAnd => "&",
             Operator::BitOr => "|",
             Operator::Xor => "^",

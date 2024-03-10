@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use crate::literal::StaticType;
+use crate::variable::VariableType;
 use crate::operator::Operator;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -10,6 +10,7 @@ pub enum TokenType {
     If,
     Else,
     While,
+    Loop,
     For,
     Break,
     Continue,
@@ -18,6 +19,15 @@ pub enum TokenType {
     Is,
     Assign,
     Op(Operator),
+
+    // control flow
+    Decimal,  // .
+    LParen,   // (
+    RParen,   // )
+    LBracket, // [
+    RBracket, // ]
+    Colon,    // :
+    Comma,    // ,
 
     // todo: these should become functions in the future
     // functions
@@ -38,7 +48,7 @@ pub enum TokenType {
     Ident(String),
 
     // types
-    StaticType(StaticType),
+    VariableType(VariableType),
     Int(i64),
     Float(f64),
     Bool(bool),
@@ -78,8 +88,16 @@ impl<'a> Lexer<'a> {
         let mut tokens = Vec::new();
         while self.pos < self.chars.len() {
             let token = self.next_token();
-            //println!("{:?}", token);
+            //println!("{}: {:?}", tokens.len(), token);
             tokens.push(token);
+        }
+        if let Some(last) = tokens.last() {
+            if last.token_type != TokenType::EOF {
+                tokens.push(Token {
+                    token_type: TokenType::EOF,
+                    lexeme: "".to_string(),
+                });
+            }
         }
         tokens
     }
@@ -110,7 +128,7 @@ impl<'a> Lexer<'a> {
                 }
             }
             // handle ending tokens
-            if c == ')' || c == '}' || c == ']' || c == ',' {
+            if c == ')' || c == '}' || c == ']' || c == ',' || c == '[' || c == '{' {
                 if !builder.is_empty() {
                     break;
                 }
@@ -118,9 +136,10 @@ impl<'a> Lexer<'a> {
                 self.pos += 1;
                 break;
             }
+
             // handle leading single character tokens
             // todo: this probably wont allow x =1, and would treat =1 as an identifier
-            if c == '(' || c == '{' || c == '[' || c == '!' {
+            if c == '(' || c == '!' {
                 builder.push(c);
                 self.pos += 1;
                 break;
@@ -154,16 +173,20 @@ impl<'a> Lexer<'a> {
             "if" => TokenType::If,
             "else" => TokenType::Else,
             "while" => TokenType::While,
+            "loop" => TokenType::Loop,
             "for" => TokenType::For,
             "break" => TokenType::Break,
             "continue" => TokenType::Continue,
             "in" => TokenType::In,
             "as" => TokenType::As,
             "is" => TokenType::Is,
-            "int" => TokenType::StaticType(StaticType::Int),
-            "float" => TokenType::StaticType(StaticType::Float),
-            "string" => TokenType::StaticType(StaticType::String),
-            "bool" => TokenType::StaticType(StaticType::Bool),
+            "int" => TokenType::VariableType(VariableType::Int),
+            "float" => TokenType::VariableType(VariableType::Float),
+            "string" => TokenType::VariableType(VariableType::String),
+            "bool" => TokenType::VariableType(VariableType::Bool),
+            "range" => TokenType::VariableType(VariableType::Range),
+            "array" => TokenType::VariableType(VariableType::Array),
+            "map" => TokenType::VariableType(VariableType::Map),
 
             // functions
             "readstr" | "readln" => TokenType::ReadStr,
@@ -178,20 +201,25 @@ impl<'a> Lexer<'a> {
             "{" => TokenType::LBrace,
             "}" => TokenType::RBrace,
 
+            // control flow
+            "=" => TokenType::Assign,
+            "." => TokenType::Decimal,
+            "[" => TokenType::LBracket,
+            "]" => TokenType::RBracket,
+            ":" => TokenType::Colon,
+            "," => TokenType::Comma,
+
             // operators
             "(" => TokenType::Op(Operator::LParen),
             ")" => TokenType::Op(Operator::RParen),
-            "=" => TokenType::Assign,
+            ")" => TokenType::RParen,
             "+" => TokenType::Op(Operator::Plus),
             "-" => TokenType::Op(Operator::Minus),
             "*" => TokenType::Op(Operator::Mul),
             "/" => TokenType::Op(Operator::Div),
             "%" => TokenType::Op(Operator::Mod),
             "**" => TokenType::Op(Operator::Pow),
-            "." => TokenType::Op(Operator::Decimal),
             ".." => TokenType::Op(Operator::Range),
-            "[" => TokenType::Op(Operator::LBracket),
-            "]" => TokenType::Op(Operator::RBracket),
             "&" => TokenType::Op(Operator::BitAnd),
             "|" => TokenType::Op(Operator::BitOr),
             "^" => TokenType::Op(Operator::Xor),

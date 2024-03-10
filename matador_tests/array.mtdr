@@ -1,0 +1,9 @@
+let arr = [1, 2, 3]
+println "arr: " + arr
+
+println arr[1]
+
+arr[2] = 4
+println "updated arr: " + arr
+
+println arr[2]
