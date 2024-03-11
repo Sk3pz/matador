@@ -4,6 +4,8 @@ use crate::variable::Variable;
 
 pub fn attach_std(interpreter: &mut Interpreter) {
     // register the standard functions
+
+    // === PRINT ===
     interpreter.register_native_function("print", |args| {
         if args.len() > 1 {
             // error
@@ -26,6 +28,7 @@ pub fn attach_std(interpreter: &mut Interpreter) {
         Variable::Int(0)
     });
 
+    // === READ ===
     interpreter.register_native_function("readln", |args| {
         if args.len() > 0 {
             // error
@@ -70,6 +73,4 @@ pub fn attach_std(interpreter: &mut Interpreter) {
             std::process::exit(1);
         }))
     });
-
-
 }
