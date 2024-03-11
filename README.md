@@ -52,15 +52,6 @@ See [tests](./matador_tests) for more examples.
 
 Todo:
 - [x] basic arithmetic
-  - [x] addition / subtraction
-  - [x] multiplication / division
-  - [x] modulo
-  - [x] unary negation
-  - [x] negation
-  - [x] power
-  - [x] comparison
-  - [x] bitwise / logical
-  - [x] parentheses / order of operations
 - [x] comments
 - [x] types
 - [x] variables
@@ -92,6 +83,7 @@ Todo:
 - [ ] functions
   - [x] function declaration
   - [x] function calls
+  - [x] native functions (functions created in rust)
   - [ ] replace built in keywords like readln and print with functions
 - [ ] structs
 - [ ] multi-file support

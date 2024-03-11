@@ -45,7 +45,6 @@ fn main() {
             if args.len() > 1 {
                 // error
                 println!("{} Print only takes 1 argument!", Color::Red);
-                std::process::exit(1);
             } else if args.len() == 1 {
                 println!("{}", args[0]);
             } else {
