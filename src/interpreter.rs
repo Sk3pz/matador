@@ -49,14 +49,8 @@ impl Interpreter {
                     last = self.eval(node);
                     if let Some(f) = &self.flag {
                         match f {
-                            InterFlag::Break => {
-                                self.flag = None;
-                                break;
-                            },
-                            InterFlag::Continue => {
-                                self.flag = None;
-                                continue;
-                            },
+                            InterFlag::Break => break,
+                            InterFlag::Continue => continue,
                             InterFlag::Return(_) => break
                         }
                     }
