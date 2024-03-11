@@ -363,8 +363,14 @@ impl Interpreter {
                         f(vars)
                     }
                     Function::Local(params, body) => {
-                        // create a new scope
+                        // create a new scope for the function
                         self.env.push_scope();
+                        // ensure the number of arguments matches the number of parameters
+                        if params.len() != args.len() {
+                            println!("{}Invalid number of arguments: {}{:?}", Color::BrightRed, Color::Red, params);
+                            flush_styles();
+                            std::process::exit(0);
+                        }
                         // set the parameters
                         for (param, arg) in params.iter().zip(args.iter()) {
                             let p = self.eval(*arg.clone());
