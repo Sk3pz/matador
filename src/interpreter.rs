@@ -1,18 +1,27 @@
-use better_term::{Color, flush_styles, read_input};
+use better_term::{Color, flush_styles};
 use crate::function::Function;
 use crate::variable::{Variable, VariableType};
 use crate::node::Node;
 use crate::postfix::ShuntedStackItem;
 use crate::scope::ScopeHandler;
 
+#[derive(Debug, PartialEq, Clone)]
+enum InterFlag {
+    Break,
+    Continue,
+    Return(Option<Variable>),
+}
+
 pub struct Interpreter {
     env: ScopeHandler,
+    flag: Option<InterFlag>,
 }
 
 impl Interpreter {
     pub fn new() -> Self {
         Interpreter {
             env: ScopeHandler::new(),
+            flag: None,
         }
     }
 
@@ -27,6 +36,13 @@ impl Interpreter {
     }
 
     fn eval(&mut self, node: Node) -> Variable {
+        if let Some(f) = &self.flag {
+            return match f {
+                InterFlag::Break => Variable::Int(0),
+                InterFlag::Continue => Variable::Int(0),
+                InterFlag::Return(v) => v.clone().unwrap_or(Variable::Int(0)),
+            };
+        }
         match node.clone() {
             Node::Variable(n) => n,
             Node::Block(nodes) => {
@@ -387,6 +403,19 @@ impl Interpreter {
             Node::While(cond, body) => {
                 let last = Variable::Int(0);
                 loop {
+                    if let Some(f) = &self.flag {
+                        match f {
+                            InterFlag::Break => {
+                                self.flag = None;
+                                break;
+                            },
+                            InterFlag::Continue => {
+                                self.flag = None;
+                                continue;
+                            },
+                            _ => {}
+                        }
+                    }
                     // evaluate condition
                     let condition = self.eval(*cond.clone()).to_bool().unwrap_or_else(|| {
                         println!("{}Invalid condition: {}{:?}", Color::BrightRed, Color::Red, cond);
@@ -404,24 +433,34 @@ impl Interpreter {
             }
             Node::Loop(body) => {
                 let last = Variable::Int(0);
-                loop {
+                'top: loop {
+                    match self.flag {
+                        Some(InterFlag::Break) => {
+                            self.flag = None;
+                            break 'top;
+                        },
+                        Some(InterFlag::Continue) => {
+                            self.flag = None;
+                            continue 'top;
+                        },
+                        _ => {}
+                    }
                     // run the body
                     self.eval(*body.clone());
-                    // todo: figure out break and continue, maybe use a flag?
-                    println!("{}WARNING: Loops do not end, so they currently only run once.", Color::BrightRed);
-                    break;
                 }
-
                 last
             }
             Node::Break => {
-                todo!()
+                self.flag = Some(InterFlag::Break);
+                Variable::Int(0)
             }
             Node::Continue => {
-                todo!()
+                self.flag = Some(InterFlag::Continue);
+                Variable::Int(0)
             }
             Node::Return(v) => {
-                todo!()
+                self.flag = Some(InterFlag::Return(v));
+                Variable::Int(0)
             }
 
             Node::EOF => Variable::Int(0),

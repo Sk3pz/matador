@@ -1,9 +1,9 @@
-fn test(a, b) {
-    println("Hello, World! " + a + " " + b)
+
+
+loop {
+    println("Hello!")
+    break
+    println("here")
 }
 
-test(1, 2)
-
-println("Hello, World!")
-
-
+println("Goodbye!")
