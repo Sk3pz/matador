@@ -2,7 +2,7 @@ use better_term::{Color, flush_styles};
 use crate::debug_print;
 use crate::lexer::{Token, TokenType};
 use crate::operator::Operator;
-use crate::variable::{Variable, VariableType};
+use crate::variable::Variable;
 use crate::node::Node;
 use crate::postfix::{ShuntedStack, ShuntedStackItem};
 
