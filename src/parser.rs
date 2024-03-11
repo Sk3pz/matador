@@ -64,7 +64,9 @@ impl Parser {
                 let ident = self.consume_ident();
                 Node::Drop(ident)
             }
-            // todo: in keyword for ranges maps and arrays
+            TokenType::Exit => {
+                Node::Exit
+            }
             TokenType::Ident(ident) => {
                 let node = self.parse_ident(ident.clone());
                 // if there is a trailing operator, treat as an operand in the shunting yard
@@ -128,6 +130,9 @@ impl Parser {
             }
             TokenType::Continue => {
                 Node::Continue
+            }
+            TokenType::Return => {
+                todo!()
             }
 
             // arrays and maps

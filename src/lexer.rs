@@ -8,6 +8,7 @@ pub enum TokenType {
     // language keywords
     Let,
     Fn,
+    Return,
     If,
     Else,
     While,
@@ -31,6 +32,7 @@ pub enum TokenType {
     // functions
     Sizeof,
     Drop,
+    Exit,
 
     // block outlines
     // not in operators as they are not used in the same way
@@ -195,6 +197,7 @@ impl<'a> Lexer<'a> {
             // language keywords
             "let" => TokenType::Let,
             "fn" => TokenType::Fn,
+            "return" => TokenType::Return,
             "if" => TokenType::If,
             "else" => TokenType::Else,
             "while" => TokenType::While,
@@ -215,6 +218,7 @@ impl<'a> Lexer<'a> {
 
             "sizeof" => TokenType::Sizeof,
             "drop" => TokenType::Drop,
+            "exit" => TokenType::Exit,
 
             // blocks
             "{" => TokenType::LBrace,

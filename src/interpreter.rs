@@ -117,6 +117,10 @@ impl Interpreter {
                 self.env.remove(&ident);
                 Variable::Int(0)
             }
+            Node::Exit => {
+                flush_styles();
+                std::process::exit(0);
+            }
             Node::VarDecl(ident, typ) => {
                 let value = typ.map_or(Variable::Int(0), |n| self.eval(*n));
                 self.env.set(&ident, value.clone());
@@ -414,6 +418,9 @@ impl Interpreter {
                 todo!()
             }
             Node::Continue => {
+                todo!()
+            }
+            Node::Return(v) => {
                 todo!()
             }
 

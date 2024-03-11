@@ -35,6 +35,7 @@ pub enum Node {
     Loop(Box<Node>),
     Continue,
     Break,
+    Return(Option<Variable>),
 
     // arithmetic
     Expression, // ( ... )
@@ -43,6 +44,7 @@ pub enum Node {
 
     Sizeof(String),
     Drop(String),
+    Exit,
     EOF,
 }
 
@@ -103,6 +105,13 @@ impl Display for Node {
             Node::Loop(block) => write!(f, "LOOP {}", block),
             Node::Continue => write!(f, "CONTINUE"),
             Node::Break => write!(f, "BREAK"),
+            Node::Return(v) => {
+                if let Some(v) = v {
+                    write!(f, "RETURN {}", v)
+                } else {
+                    write!(f, "RETURN")
+                }
+            }
 
             Node::VarDecl(ident, typ) => {
                 if let Some(typ) = typ {
@@ -131,6 +140,7 @@ impl Display for Node {
             Node::TypeCheck(node, typ) => write!(f, "CHECK {} IS {}", node, typ),
             Node::Sizeof(ident) => write!(f, "SIZEOF {}", ident),
             Node::Drop(node) => write!(f, "DROP {}", node),
+            Node::Exit => write!(f, "EXIT"),
             Node::EOF => write!(f, "EOF"),
         }
     }
