@@ -25,27 +25,27 @@ println "Welcome to the Matador Calculator!"
 
 // Get the first number
 print "Enter the first number: "
-let first = readint
+let first = readint()
 
 // Get the operator
 print "Enter the operator (+, -, *, /): "
-let operator = readln
+let operator = readln()
 
 // Get the second number
 print "Enter the second number: "
-let second = readint
+let second = readint()
 
 // Perform the calculation
 if operator == "+" {
-    println "The result is: " + (first + second)
+    println("The result is: " + (first + second))
 } else if operator == "-" {
-    println "The result is: " + (first - second)
+    println("The result is: " + (first - second))
 } else if operator == "*" {
-    println "The result is: " + (first * second)
+    println("The result is: " + (first * second))
 } else if operator == "/" {
-    println "The result is: " + (first / second)
+    println("The result is: " + (first / second))
 } else {
-    println "Invalid operator!"
+    println("Invalid operator!")
 }
 ```
 See [tests](./matador_tests) for more examples.  
