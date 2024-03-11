@@ -28,7 +28,7 @@ let b = true
 let result = x + y // addition
 
 // printlning
-println result
+println(result)
 
 // reassignment
 x = 2
@@ -37,21 +37,21 @@ y = x * y + result
 println y
 // free y from memory as it is not used again
 drop y
-println str
+println(str)
 
 // conditionals
 if true {
-    println "This is true"
+    println("This is true")
 } else {
-    println "This is false"
+    println("This is false")
 }
 
 if x == 2 {
-   println "x is 2"
+   println("x is 2")
 } else if x == 3 {
-   println "x is 3"
+   println("x is 3")
 } else {
-   println "x is not 2 or 3"
+   println("x is not 2 or 3")
 }
 
-println "This is Matador (" + b + ")! 🐂"
+println("This is Matador (" + b + ")! 🐂")

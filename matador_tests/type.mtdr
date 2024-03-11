@@ -2,10 +2,10 @@
 let x = 1
 
 if x is int {
-    println "x is an integer"
+    println("x is an integer")
 } else {
-    println "x is not an integer"
+    println("x is not an integer")
 }
 
 let y = x as string
-println y
+println(y)

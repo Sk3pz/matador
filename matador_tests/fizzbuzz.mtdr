@@ -11,16 +11,16 @@ while x <= 100 {
 
     if x % 3 == 0 && x % 5 == 0 {
         // if x is divisible by 3 and 5
-        println "FizzBuzz"
+        println("FizzBuzz")
     } else if x % 3 == 0 {
         // if x is divisible by 3
-        println "Fizz"
+        println("Fizz")
     }else if x % 5 == 0 {
         // if x is divisible by 5
-        println "Buzz"
+        println("Buzz")
     } else {
         // if x is not divisible by 3 or 5
-        println x
+        println(x)
     }
 
 

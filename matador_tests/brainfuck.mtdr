@@ -74,10 +74,7 @@ while i < len {
   i = i + 1
 }
 
-//println result == expected
-//println "expected: " + expected
-
 // should print "pass: true"
-println "pass: " + (result == expected)
-println "expected: " + expected
-println "result: " + result
+println("pass: " + (result == expected))
+println("expected: " + expected)
+println("result: " + result)

@@ -1,10 +1,10 @@
 let x = 2
 let y = 3
 
-println (x + y)
+println((x + y))
 
 let z = 4 * -1 + -3
-println z
+println(z)
 
 z = "Hi"
-println z
+println(z)

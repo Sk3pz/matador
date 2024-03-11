@@ -1,7 +1,7 @@
 let x = {
     let y = 2 ** 2 // 2 to the power of 2
-    println y // prints 4
+    println(y) // prints 4
     y // sets x to 4
 }
 
-println x // prints 4
+println(x) // prints 4
