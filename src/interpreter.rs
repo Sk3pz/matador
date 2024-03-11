@@ -57,12 +57,7 @@ impl Interpreter {
                                 self.flag = None;
                                 continue;
                             },
-                            InterFlag::Return(v) => {
-                                if let Some(v) = v {
-                                    last = self.eval(*v.clone());
-                                }
-                                break;
-                            }
+                            InterFlag::Return(_) => break
                         }
                     }
                 }
@@ -71,7 +66,6 @@ impl Interpreter {
                 last
             }
             Node::ShuntedStack(stack) => {
-                //println!("{}Postfix stack: {}{:?}", Color::BrightYellow, Color::Yellow, stack);
                 flush_styles();
                 // interpret the stack and return the result
                 let mut operand_stack: Vec<Variable> = Vec::new();
