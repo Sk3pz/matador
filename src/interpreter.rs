@@ -57,7 +57,10 @@ impl Interpreter {
                                 self.flag = None;
                                 continue;
                             },
-                            InterFlag::Return(_) => {
+                            InterFlag::Return(v) => {
+                                if let Some(v) = v {
+                                    last = self.eval(*v.clone());
+                                }
                                 break;
                             }
                         }
@@ -432,7 +435,7 @@ impl Interpreter {
                                 self.flag = None;
                                 continue;
                             },
-                            _ => {}
+                            InterFlag::Return(_) => break
                         }
                     }
                     // evaluate condition
@@ -462,6 +465,7 @@ impl Interpreter {
                             self.flag = None;
                             continue 'top;
                         },
+                        InterFlag::Return(_) => break,
                         _ => {}
                     }
                     // run the body
