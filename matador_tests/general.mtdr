@@ -1,9 +1,9 @@
-let s = "Test"
+let x = [0, 1, 2, 3]
 
-let s1 = s[0]
+let l = x[sizeof x - 1]
 
-println s1
-
-if true {
-    println "true"
+let i = 0
+while i < sizeof x {
+    println x[i]
+    i = i + 1
 }

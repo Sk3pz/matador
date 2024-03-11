@@ -22,7 +22,7 @@ impl Interpreter {
     }
 
     fn eval(&mut self, node: Node) -> Variable {
-        match node {
+        match node.clone() {
             Node::Variable(n) => n,
             Node::Block(nodes) => {
                 let mut last = Variable::Int(0);
@@ -79,8 +79,8 @@ impl Interpreter {
                             if let Some(lit) = op.apply_binary(left.clone(), right.clone()) {
                                 operand_stack.push(lit);
                             } else {
-                                println!("{}Invalid operation (syab): {}{:?} {} {:?}",
-                                         Color::BrightRed, Color::Red, left, op, right);
+                                println!("{}Invalid operation (syab): {}{:?} {} {:?} ; {:?}",
+                                         Color::BrightRed, Color::Red, left, op, right, node);
                                 flush_styles();
                                 std::process::exit(0);
                             }

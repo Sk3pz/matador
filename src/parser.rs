@@ -31,9 +31,10 @@ impl Parser {
         let token = &self.tokens[self.pos];
         self.pos += 1;
         match &token.token_type {
-            TokenType::LBrace => {
+            TokenType::LBrace => { // {
+                debug_print!("{}Parsing block @ {}", Color::BrightPurple, self.pos - 1);
                 let block = self.parse_block();
-
+                self.pos += 1;
                 // if there is a trailing operator, treat as an operand in the shunting yard
                 if self.should_shunt_from_lit() {
                     self.shunting_yard(block)
@@ -53,16 +54,32 @@ impl Parser {
                 }
             }
             TokenType::ReadStr => {
-                Node::Read(VariableType::String)
+                if self.should_shunt_from_lit() {
+                    self.shunting_yard(Node::Read(VariableType::String))
+                } else {
+                    Node::Read(VariableType::String)
+                }
             }
             TokenType::ReadInt => {
-                Node::Read(VariableType::Int)
+                if self.should_shunt_from_lit() {
+                    self.shunting_yard(Node::Read(VariableType::Int))
+                } else {
+                    Node::Read(VariableType::Int)
+                }
             }
             TokenType::ReadFloat => {
-                Node::Read(VariableType::Float)
+                if self.should_shunt_from_lit() {
+                    self.shunting_yard(Node::Read(VariableType::Float))
+                } else {
+                    Node::Read(VariableType::Float)
+                }
             }
             TokenType::ReadBool => {
-                Node::Read(VariableType::Bool)
+                if self.should_shunt_from_lit() {
+                    self.shunting_yard(Node::Read(VariableType::Bool))
+                } else {
+                    Node::Read(VariableType::Bool)
+                }
             }
             TokenType::Print => {
                 let expr = self.next();
@@ -74,7 +91,11 @@ impl Parser {
             }
             TokenType::Sizeof => {
                 let ident = self.consume_ident();
-                Node::Sizeof(ident)
+                if self.should_shunt_from_lit() {
+                    self.shunting_yard(Node::Sizeof(ident))
+                } else {
+                    Node::Sizeof(ident)
+                }
             }
             TokenType::Drop => {
                 let ident = self.consume_ident();
@@ -82,13 +103,12 @@ impl Parser {
             }
             // todo: in keyword for ranges maps and arrays
             TokenType::Ident(ident) => {
-                let ident = self.parse_ident(ident.clone());
-
+                let node = self.parse_ident(ident.clone());
                 // if there is a trailing operator, treat as an operand in the shunting yard
                 if self.should_shunt_from_lit() {
-                    self.shunting_yard(ident)
+                    self.shunting_yard(node)
                 } else {
-                    ident
+                    node
                 }
             },
 
@@ -110,8 +130,11 @@ impl Parser {
             TokenType::While => {
                 // get the condition
                 let cond = Box::new(self.next());
+                debug_print!("{}While cond: {}", Color::BrightCyan, cond);
+                debug_print!("Next token: {:?}", self.peek().token_type);
                 // get the block
                 let block = Box::new(self.next());
+                debug_print!("{}While block: {}", Color::BrightCyan, block);
                 Node::While(cond, block)
             }
             TokenType::Loop => {
@@ -132,16 +155,11 @@ impl Parser {
             // arrays and maps
             TokenType::LBracket => {
                 // array = [1, 2, 3]
-                match self.peek().token_type {
-                    TokenType::RBracket => {
-                        self.pos += 1;
-                        Node::Variable(Variable::Array(Vec::new()))
-                    }
-                    _ => {
-                        // array with elements
-                        let elements = self.parse_params(TokenType::RBracket);
-                        Node::Array(elements)
-                    }
+                let arr = self.parse_array();
+                if self.should_shunt_from_lit() {
+                    self.shunting_yard(arr)
+                } else {
+                    arr
                 }
             }
 
@@ -176,6 +194,7 @@ impl Parser {
 
     pub fn should_shunt_from_lit(&self) -> bool {
         if self.pos < self.tokens.len() {
+            let next = &self.peek().token_type;
             match self.peek().token_type {
                 TokenType::Op(_) => {
                     true
@@ -192,7 +211,6 @@ impl Parser {
         while self.peek().token_type != TokenType::RBrace {
             nodes.push(self.next());
         }
-        self.pos += 1;
         Node::Block(nodes)
     }
 
@@ -202,24 +220,24 @@ impl Parser {
         if self.pos >= self.tokens.len() {
             return Node::Ident(ident);
         }
-        match self.peek().token_type {
+        let next = &self.peek().token_type;
+        match next {
             TokenType::Assign => {
                 self.pos += 1;
                 let expr = self.next();
                 Node::VarDecl(ident, Some(Box::new(expr)))
             }
             // array / map access and assignment
-            TokenType::LBracket => {
+            TokenType::LBracket => { // [
                 self.pos += 1;
                 let index = self.next();
                 // check for closing bracket
-                if self.peek().token_type == TokenType::RBracket {
-                    self.pos += 1;
-                } else {
-                    // invalid token, dump info and exit
+                if self.peek().token_type != TokenType::RBracket {
                     println!("{}Missing Right Bracket (']'), found: {}{:?} @ {:?}", Color::BrightRed, Color::Red, self.peek().token_type, self.peek().pos);
                     flush_styles();
                     std::process::exit(0);
+                } else {
+                    self.pos += 1;
                 }
                 if self.pos >= self.tokens.len() {
                     return Node::ArrayMapAccess(ident, Box::new(index));
@@ -227,7 +245,6 @@ impl Parser {
                 // handle assignment or access
                 match self.peek().clone().token_type {
                     TokenType::Assign => {
-                        self.pos += 1;
                         let expr = self.next();
                         Node::ArrayMapAssign(ident, Box::new(index), Box::new(expr))
                     }
@@ -241,7 +258,6 @@ impl Parser {
                 self.pos += 1;
                 match self.peek().clone().token_type {
                     TokenType::VariableType(typ) => {
-                        self.pos += 1;
                         Node::TypeCast(Box::new(Node::Ident(ident)), typ.clone())
                     }
                     _ => {
@@ -256,7 +272,6 @@ impl Parser {
                 self.pos += 1;
                 match self.peek().clone().token_type {
                     TokenType::VariableType(typ) => {
-                        self.pos += 1;
                         Node::TypeCheck(Box::new(Node::Ident(ident)), typ.clone())
                     }
                     _ => {
@@ -268,6 +283,20 @@ impl Parser {
                 }
             }
             _ => Node::Ident(ident)
+        }
+    }
+
+    fn parse_array(&mut self) -> Node {
+        match self.peek().token_type {
+            TokenType::RBracket => {
+                Node::Variable(Variable::Array(Vec::new()))
+            }
+            _ => {
+                // array with elements
+                let elements = self.parse_params(TokenType::RBracket);
+                self.pos += 1;
+                Node::Array(elements)
+            }
         }
     }
 
@@ -431,14 +460,21 @@ impl Parser {
                     if last_was_lit {
                         break;
                     }
+                    self.pos += 1;
                     let block = self.parse_block();
                     postfix.push(ShuntedStackItem::Operand(block));
                     last_op = None;
                     last_was_lit = true;
                 }
-                TokenType::LBracket => {
-                    // parse arrays
-                    todo!()
+                TokenType::Sizeof => {
+                    if last_was_lit {
+                        break;
+                    }
+                    self.pos += 1;
+                    let ident = self.consume_ident();
+                    postfix.push(ShuntedStackItem::Operand(Node::Sizeof(ident)));
+                    last_op = None;
+                    last_was_lit = true;
                 }
                 TokenType::Int(n) => {
                     if last_was_lit {
@@ -479,6 +515,18 @@ impl Parser {
                         break;
                     }
                     postfix.push(ShuntedStackItem::Operand(Node::Variable(Variable::String(s.clone()))));
+                    last_op = None;
+                    last_was_lit = true;
+                }
+                // has to be after ident
+                TokenType::LBracket => { // [
+                    // parse arrays
+                    if last_was_lit {
+                        break;
+                    }
+                    self.pos += 1;
+                    let arr = self.parse_array();
+                    postfix.push(ShuntedStackItem::Operand(arr));
                     last_op = None;
                     last_was_lit = true;
                 }
