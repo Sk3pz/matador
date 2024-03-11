@@ -17,7 +17,7 @@ mod matador_std;
 
 const TEST_CODE: &str = include_str!("../matador_tests/general.mtdr");
 
-pub const DEBUG_OUTPUT: bool = true;
+pub const DEBUG_OUTPUT: bool = false;
 
 fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {
     let start = std::time::Instant::now();
