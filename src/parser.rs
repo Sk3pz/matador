@@ -32,7 +32,6 @@ impl Parser {
         self.pos += 1;
         match &token.token_type {
             TokenType::LBrace => { // {
-                debug_print!("{}Parsing block @ {}", Color::BrightPurple, self.pos - 1);
                 let block = self.parse_block();
                 self.pos += 1;
                 // if there is a trailing operator, treat as an operand in the shunting yard
@@ -130,11 +129,8 @@ impl Parser {
             TokenType::While => {
                 // get the condition
                 let cond = Box::new(self.next());
-                debug_print!("{}While cond: {}", Color::BrightCyan, cond);
-                debug_print!("Next token: {:?}", self.peek().token_type);
                 // get the block
                 let block = Box::new(self.next());
-                debug_print!("{}While block: {}", Color::BrightCyan, block);
                 Node::While(cond, block)
             }
             TokenType::Loop => {
@@ -245,6 +241,7 @@ impl Parser {
                 // handle assignment or access
                 match self.peek().clone().token_type {
                     TokenType::Assign => {
+                        self.pos += 1;
                         let expr = self.next();
                         Node::ArrayMapAssign(ident, Box::new(index), Box::new(expr))
                     }
@@ -289,12 +286,12 @@ impl Parser {
     fn parse_array(&mut self) -> Node {
         match self.peek().token_type {
             TokenType::RBracket => {
+                self.pos += 1;
                 Node::Variable(Variable::Array(Vec::new()))
             }
             _ => {
                 // array with elements
                 let elements = self.parse_params(TokenType::RBracket);
-                self.pos += 1;
                 Node::Array(elements)
             }
         }
@@ -368,11 +365,6 @@ impl Parser {
                 op_stack.push(Operator::LParen);
                 last_op = Some(Operator::LParen);
             }
-            // _ => {
-            //     println!("{}Invalid token (as): {}{}", Color::BrightRed, Color::Red, lhs);
-            //     flush_styles();
-            //     std::process::exit(0);
-            // }
             // add all others to the stack, assume parser knows best
             _ => {
                 postfix.push(ShuntedStackItem::Operand(lhs));
@@ -472,6 +464,7 @@ impl Parser {
                     }
                     self.pos += 1;
                     let ident = self.consume_ident();
+                    self.pos -= 1; // todo: figure out why this works
                     postfix.push(ShuntedStackItem::Operand(Node::Sizeof(ident)));
                     last_op = None;
                     last_was_lit = true;

@@ -1,9 +1,5 @@
 let x = [0, 1, 2, 3]
 
-let l = x[sizeof x - 1]
+x[0] = x[0] + 1
 
-let i = 0
-while i < sizeof x {
-    println x[i]
-    i = i + 1
-}
+println x
