@@ -465,7 +465,7 @@ impl Interpreter {
                             self.flag = None;
                             continue 'top;
                         },
-                        InterFlag::Return(_) => break,
+                        Some(InterFlag::Return(_)) => break,
                         _ => {}
                     }
                     // run the body
