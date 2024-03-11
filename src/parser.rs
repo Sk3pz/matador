@@ -120,7 +120,6 @@ impl Parser {
                     std::process::exit(0);
                 }
                 self.pos += 1; // consume left paren
-                println!("ident: {}", ident);
 
                 // get the parameter ident list
                 let params = self.parse_ident_params(TokenType::Op(Operator::RParen));
@@ -266,6 +265,10 @@ impl Parser {
             TokenType::Op(Operator::LParen) => { // (
                 self.pos += 1;
                 let params = self.parse_params(TokenType::Op(Operator::RParen));
+                // peak future for As, Is, LBracket and In
+                if self.pos >= self.tokens.len() {
+                    return Node::FunctionCall(ident, params);
+                }
                 Node::FunctionCall(ident, params)
             }
             TokenType::In => {

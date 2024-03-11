@@ -85,6 +85,7 @@ Todo:
   - [x] function calls
   - [x] native functions (functions created in rust)
   - [ ] replace built in keywords like readln and print with functions
+  - [ ] function calls are treated as variables (i.e. example()[0] when example returns an array does not work)
 - [ ] structs
 - [ ] multi-file support
 - [ ] loading and running other matador programs (maybe done through a function call)
