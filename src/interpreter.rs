@@ -47,6 +47,21 @@ impl Interpreter {
                 self.env.push_scope();
                 for node in nodes {
                     last = self.eval(node);
+                    if let Some(f) = &self.flag {
+                        match f {
+                            InterFlag::Break => {
+                                self.flag = None;
+                                break;
+                            },
+                            InterFlag::Continue => {
+                                self.flag = None;
+                                continue;
+                            },
+                            InterFlag::Return(_) => {
+                                break;
+                            }
+                        }
+                    }
                 }
                 // remove the scope
                 self.env.pop_scope();
