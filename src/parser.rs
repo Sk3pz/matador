@@ -426,7 +426,7 @@ impl Parser {
                                 // println!("{}Invalid token (asrp): {}{:?} @ {:?}", Color::BrightRed, Color::Red, token.token_type, token.pos);
                                 // flush_styles();
                                 // std::process::exit(0);
-                                break; // todo: this is to fix functions
+                                break; // this is to fix functions
                             }
 
                             last_op = Some(op.clone());
