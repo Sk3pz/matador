@@ -28,14 +28,7 @@ pub enum TokenType {
     Colon,    // :
     Comma,    // ,
 
-    // todo: these should become functions in the future
     // functions
-    Print,
-    Println,
-    ReadStr,
-    ReadInt,
-    ReadFloat,
-    ReadBool,
     Sizeof,
     Drop,
 
@@ -220,13 +213,6 @@ impl<'a> Lexer<'a> {
             "array" => TokenType::VariableType(VariableType::Array),
             "map" => TokenType::VariableType(VariableType::Map),
 
-            // functions
-            "readstr" | "readln" => TokenType::ReadStr,
-            "readint" => TokenType::ReadInt,
-            "readfloat" => TokenType::ReadFloat,
-            "readbool" => TokenType::ReadBool,
-            "print" => TokenType::Print,
-            "println" => TokenType::Println,
             "sizeof" => TokenType::Sizeof,
             "drop" => TokenType::Drop,
 

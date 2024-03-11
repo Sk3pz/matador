@@ -104,44 +104,6 @@ impl Interpreter {
             Node::Ident(ident) => {
                 self.env.get_or_else(&ident).clone()
             },
-            Node::Print(node, newline) => {
-                print!("{}{}", self.eval(*node), if newline { "\n" } else { "" });
-                Variable::Int(0)
-            }
-            Node::Read(typ) => {
-                let input = read_input!();
-                match typ {
-                    VariableType::Int => {
-                        Variable::Int(input.parse().unwrap_or_else(|_| {
-                            println!("{}Invalid input: {}{}", Color::BrightRed, Color::Red, input);
-                            flush_styles();
-                            std::process::exit(0);
-                        }))
-                    },
-                    VariableType::Float => {
-                        Variable::Float(input.parse().unwrap_or_else(|_| {
-                            println!("{}Invalid input: {}{}", Color::BrightRed, Color::Red, input);
-                            flush_styles();
-                            std::process::exit(0);
-                        }))
-                    },
-                    VariableType::Bool => {
-                        Variable::Bool(input.parse().unwrap_or_else(|_| {
-                            println!("{}Invalid input: {}{}", Color::BrightRed, Color::Red, input);
-                            flush_styles();
-                            std::process::exit(0);
-                        }))
-                    },
-                    VariableType::String => {
-                        Variable::String(input)
-                    },
-                    _ => {
-                        println!("{}==PARSING ERROR: REPORT THIS== Invalid input type: {}{:?}", Color::BrightRed, Color::Red, typ);
-                        flush_styles();
-                        std::process::exit(0);
-                    }
-                }
-            }
             Node::Sizeof(ident) => {
                 let value = self.env.get_or_else(&ident);
                 value.sizeof().unwrap_or_else(|| {

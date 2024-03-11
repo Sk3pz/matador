@@ -41,9 +41,7 @@ pub enum Node {
     Negative,
     Not,
 
-    Print(Box<Node>, bool),
     Sizeof(String),
-    Read(VariableType),
     Drop(String),
     EOF,
 }
@@ -131,8 +129,6 @@ impl Display for Node {
             }
             Node::TypeCast(node, typ) => write!(f, "CAST {} TO {}", node, typ),
             Node::TypeCheck(node, typ) => write!(f, "CHECK {} IS {}", node, typ),
-            Node::Read(typ) => write!(f, "READ {}", typ),
-            Node::Print(node, newline) => write!(f, "PRINT {}{}", node, if *newline { "LN" } else { "" }),
             Node::Sizeof(ident) => write!(f, "SIZEOF {}", ident),
             Node::Drop(node) => write!(f, "DROP {}", node),
             Node::EOF => write!(f, "EOF"),

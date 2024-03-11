@@ -13,6 +13,7 @@ mod operator;
 mod scope;
 pub mod debug;
 mod function;
+mod matador_std;
 
 const TEST_CODE: &str = include_str!("../matador_tests/general.mtdr");
 
@@ -41,17 +42,7 @@ fn main() {
     });
     let (_, interpret_time) = timed(|| {
         let mut interpreter = interpreter::Interpreter::new();
-        interpreter.register_native_function("print_native", |args| {
-            if args.len() > 1 {
-                // error
-                println!("{} Print only takes 1 argument!", Color::Red);
-            } else if args.len() == 1 {
-                println!("{}", args[0]);
-            } else {
-                println!("{}", args[0]);
-            }
-            Variable::Int(0)
-        });
+        matador_std::attach_std(&mut interpreter);
         interpreter.interpret(nodes);
     });
     println!("{gb}Ran code in {y}{:?} {gb}with {y}{} {gb}tokens.",

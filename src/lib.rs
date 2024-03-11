@@ -12,6 +12,7 @@ mod operator;
 mod scope;
 mod debug;
 mod function;
+mod matador_std;
 
 pub const DEBUG_OUTPUT: bool = false;
 

@@ -52,42 +52,6 @@ impl Parser {
                     Node::VarDecl(ident, None)
                 }
             }
-            TokenType::ReadStr => {
-                if self.should_shunt_from_lit() {
-                    self.shunting_yard(Node::Read(VariableType::String))
-                } else {
-                    Node::Read(VariableType::String)
-                }
-            }
-            TokenType::ReadInt => {
-                if self.should_shunt_from_lit() {
-                    self.shunting_yard(Node::Read(VariableType::Int))
-                } else {
-                    Node::Read(VariableType::Int)
-                }
-            }
-            TokenType::ReadFloat => {
-                if self.should_shunt_from_lit() {
-                    self.shunting_yard(Node::Read(VariableType::Float))
-                } else {
-                    Node::Read(VariableType::Float)
-                }
-            }
-            TokenType::ReadBool => {
-                if self.should_shunt_from_lit() {
-                    self.shunting_yard(Node::Read(VariableType::Bool))
-                } else {
-                    Node::Read(VariableType::Bool)
-                }
-            }
-            TokenType::Print => {
-                let expr = self.next();
-                Node::Print(Box::new(expr), false)
-            }
-            TokenType::Println => {
-                let expr = self.next();
-                Node::Print(Box::new(expr), true)
-            }
             TokenType::Sizeof => {
                 let ident = self.consume_ident();
                 if self.should_shunt_from_lit() {
