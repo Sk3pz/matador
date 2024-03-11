@@ -99,4 +99,7 @@ Todo:
 - [ ] expose API for creating libraries
 - [ ] expose lexer for linting and syntax highlighting
 - [ ] better error messages
+  - [x] lexer / parser line numbers
+  - [ ] interpreter line numbers
+  - [ ] less ambiguous error messages from parser and interpreter
 - [ ] optimize and refactor

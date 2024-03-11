@@ -1,7 +1,7 @@
-fn test(a) {
-    println "Hello, World! " + a
+fn test(a, b) {
+    println "Hello, World! " + a + " " + b
 }
 
-test(1)
+test(1, 2)
 
 print_native("Hello, World!")
