@@ -11,6 +11,7 @@ mod postfix;
 mod operator;
 mod scope;
 pub mod debug;
+mod function;
 
 const TEST_CODE: &str = include_str!("../matador_tests/general.mtdr");
 

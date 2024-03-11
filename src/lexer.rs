@@ -23,8 +23,6 @@ pub enum TokenType {
 
     // control flow
     Decimal,  // .
-    LParen,   // (
-    RParen,   // )
     LBracket, // [
     RBracket, // ]
     Colon,    // :
@@ -125,7 +123,7 @@ impl<'a> Lexer<'a> {
                     while self.pos < self.chars.len() && self.chars[self.pos] != '\n' {
                         self.update_code_pos(1);
                     }
-                    if self.chars[self.pos] == '\n' {
+                    if self.pos < self.chars.len() && self.chars[self.pos] == '\n' {
                         self.code_pos.0 += 1;
                         self.code_pos.1 = 0;
                     }
@@ -143,7 +141,7 @@ impl<'a> Lexer<'a> {
                 }
             }
             // handle ending tokens
-            if c == ')' || c == '}' || c == ']' || c == ',' || c == '[' || c == '{' {
+            if c == ')' || c == '}' || c == ']' || c == ',' || c == '[' || c == '{' || c == '(' {
                 if !builder.is_empty() {
                     break;
                 }
@@ -166,6 +164,15 @@ impl<'a> Lexer<'a> {
                 }
                 builder.push_str("!=");
                 self.update_code_pos(2);
+                break;
+            }
+
+            if c == '!' {
+                if !builder.is_empty() {
+                    break;
+                }
+                builder.push(c);
+                self.update_code_pos(1);
                 break;
             }
 

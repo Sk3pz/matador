@@ -27,6 +27,9 @@ pub enum Node {
 
     TypeCast(Box<Node>, VariableType),
     TypeCheck(Box<Node>, VariableType),
+
+    FunctionDecl(String, Vec<String>, Box<Node>),
+    FunctionCall(String, Vec<Box<Node>>),
     If(Box<Node>, Option<Box<Node>>, Option<Box<Node>>),
     While(Box<Node>, Box<Node>),
     Loop(Box<Node>),
@@ -68,6 +71,20 @@ impl Display for Node {
                     write!(f, "{} ", node)?;
                 }
                 write!(f, "}}")
+            }
+            Node::FunctionDecl(ident, args, block) => {
+                write!(f, "FUNCTION '{}'(", ident)?;
+                for arg in args {
+                    write!(f, "{} ", arg)?;
+                }
+                write!(f, ") {}", block)
+            }
+            Node::FunctionCall(ident, args) => {
+                write!(f, "CALL '{}'(", ident)?;
+                for arg in args {
+                    write!(f, "{} ", arg)?;
+                }
+                write!(f, ")")
             }
             Node::If(cond, then, els) => {
                 if let Some(then) = then {

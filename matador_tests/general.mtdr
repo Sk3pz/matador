@@ -1,5 +1,5 @@
-let x = [0, 1, 2, 3]
+fn test() {
+    println "Hello, World!"
+}
 
-x[0] = x[0] + 1
-
-println x
+test(1, 2)

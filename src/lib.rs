@@ -11,6 +11,7 @@ mod postfix;
 mod operator;
 mod scope;
 mod debug;
+mod function;
 
 pub const DEBUG_OUTPUT: bool = false;
 

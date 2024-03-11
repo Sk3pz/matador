@@ -61,7 +61,7 @@ while i < len {
   else if input[i] == "]" {
     if mem[ptr] != 0 {
       i = i - 1
-      while x > 0 || input[i] != "[" { // broken, running not set on next iter
+      while x > 0 || input[i] != "[" {
         if input[i] == "]" {
           x = x + 1
         } else if input[i] == "[" {
@@ -78,4 +78,6 @@ while i < len {
 //println "expected: " + expected
 
 // should print "pass: true"
-println "pass: " + result == expected
+println "pass: " + (result == expected)
+println "expected: " + expected
+println "result: " + result

@@ -1,17 +1,32 @@
 use std::collections::HashMap;
 use better_term::{Color, flush_styles};
+use crate::function::Function;
 use crate::variable::Variable;
 
 #[derive(Debug, Clone)]
 struct Scope {
     variables: HashMap<String, Variable>,
+    functions: HashMap<String, Function>,
 }
 
 impl Scope {
     fn new() -> Self {
         Scope {
             variables: HashMap::new(),
+            functions: HashMap::new(),
         }
+    }
+
+    fn push_function(&mut self, ident: String, function: Function) {
+        self.functions.insert(ident, function);
+    }
+
+    fn function_exists(&self, ident: String) -> bool {
+        self.functions.contains_key(&ident)
+    }
+
+    fn get_function(&self, ident: String) -> Option<&Function> {
+        self.functions.get(&ident)
     }
 
     fn set(&mut self, ident: &str, value: Variable) {
@@ -86,6 +101,28 @@ impl ScopeHandler {
         println!("{}Undefined variable: {}{}", Color::BrightRed, Color::Red, ident);
         flush_styles();
         std::process::exit(0);
+    }
+
+    pub fn get_function(&self, ident: String) -> Option<&Function> {
+        for scope in self.scopes.iter().rev() {
+            if let Some(value) = scope.get_function(ident.clone()) {
+                return Some(value);
+            }
+        }
+        None
+    }
+
+    pub fn function_exists(&self, ident: String) -> bool {
+        for scope in self.scopes.iter().rev() {
+            if scope.function_exists(ident.clone()) {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn push_function(&mut self, ident: String, function: Function) {
+        self.scopes.last_mut().unwrap().push_function(ident, function);
     }
 
     pub fn remove(&mut self, ident: &str) {

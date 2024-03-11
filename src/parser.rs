@@ -111,6 +111,24 @@ impl Parser {
                 }
             },
 
+            TokenType::Fn => {
+                let ident = self.consume_ident();
+                // consume left paren
+                if self.peek().token_type != TokenType::Op(Operator::LParen) {
+                    println!("{}Missing Left Parenthesis ('('), found: {}{:?} @ {:?}", Color::BrightRed, Color::Red, self.peek().token_type, self.peek().pos);
+                    flush_styles();
+                    std::process::exit(0);
+                }
+                self.pos += 1; // consume left paren
+                println!("ident: {}", ident);
+                let params = Vec::new();
+                // todo: remove this
+                self.pos += 1; // consume right paren
+                let block = Box::new(self.next());
+
+                Node::FunctionDecl(ident, params, block)
+            }
+
             TokenType::If => {
                 // get the condition
                 let cond = self.next();
@@ -192,9 +210,7 @@ impl Parser {
         if self.pos < self.tokens.len() {
             let next = &self.peek().token_type;
             match self.peek().token_type {
-                TokenType::Op(_) => {
-                    true
-                }
+                TokenType::Op(_) => true,
                 _ => false,
             }
         } else {
@@ -216,8 +232,7 @@ impl Parser {
         if self.pos >= self.tokens.len() {
             return Node::Ident(ident);
         }
-        let next = &self.peek().token_type;
-        match next {
+        match self.peek().token_type {
             TokenType::Assign => {
                 self.pos += 1;
                 let expr = self.next();
@@ -248,6 +263,11 @@ impl Parser {
                     _ => Node::ArrayMapAccess(ident, Box::new(index))
                 }
             }
+            TokenType::Op(Operator::LParen) => { // (
+                self.pos += 1;
+                let params = self.parse_params(TokenType::Op(Operator::RParen));
+                Node::FunctionCall(ident, params)
+            }
             TokenType::In => {
                 todo!()
             }
@@ -255,6 +275,7 @@ impl Parser {
                 self.pos += 1;
                 match self.peek().clone().token_type {
                     TokenType::VariableType(typ) => {
+                        self.pos += 1;
                         Node::TypeCast(Box::new(Node::Ident(ident)), typ.clone())
                     }
                     _ => {
@@ -269,6 +290,7 @@ impl Parser {
                 self.pos += 1;
                 match self.peek().clone().token_type {
                     TokenType::VariableType(typ) => {
+                        self.pos += 1;
                         Node::TypeCheck(Box::new(Node::Ident(ident)), typ.clone())
                     }
                     _ => {
@@ -403,9 +425,10 @@ impl Parser {
 
                             if !found {
                                 // error: missing left parenthesis
-                                println!("{}Invalid token (asrp): {}{:?} @ {:?}", Color::BrightRed, Color::Red, token.token_type, token.pos);
-                                flush_styles();
-                                std::process::exit(0);
+                                // println!("{}Invalid token (asrp): {}{:?} @ {:?}", Color::BrightRed, Color::Red, token.token_type, token.pos);
+                                // flush_styles();
+                                // std::process::exit(0);
+                                break; // todo: this is to fix functions
                             }
 
                             last_op = Some(op.clone());
@@ -464,7 +487,7 @@ impl Parser {
                     }
                     self.pos += 1;
                     let ident = self.consume_ident();
-                    self.pos -= 1; // todo: figure out why this works
+                    self.pos -= 1; // because peak looks at current, not future
                     postfix.push(ShuntedStackItem::Operand(Node::Sizeof(ident)));
                     last_op = None;
                     last_was_lit = true;
@@ -490,8 +513,11 @@ impl Parser {
                     if last_was_lit {
                         break;
                     }
+                    self.pos += 1;
                     let ident = self.parse_ident(ident.clone());
+                    self.pos -= 1; // because peak looks at current, not future
                     postfix.push(ShuntedStackItem::Operand(ident.clone()));
+
                     last_op = None;
                     last_was_lit = true;
                 }

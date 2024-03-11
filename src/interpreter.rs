@@ -1,4 +1,5 @@
 use better_term::{Color, flush_styles, read_input};
+use crate::function::Function;
 use crate::variable::{Variable, VariableType};
 use crate::node::Node;
 use crate::postfix::ShuntedStackItem;
@@ -335,6 +336,45 @@ impl Interpreter {
                         println!("{}Invalid type check: {}{:?}", Color::BrightRed, Color::Red, ident);
                         flush_styles();
                         std::process::exit(0);
+                    }
+                }
+            }
+            Node::FunctionDecl(ident, args, body) => {
+                self.env.push_function(ident, Function::Local(args, *body));
+                Variable::Int(0)
+            }
+            Node::FunctionCall(ident, args) => {
+                let func = self.env.get_function(ident.clone()).unwrap_or_else(|| {
+                    println!("{}Invalid function call: {}{:?}", Color::BrightRed, Color::Red, ident);
+                    flush_styles();
+                    std::process::exit(0);
+                }).clone();
+
+                match func {
+                    Function::Native(f) => {
+                        let mut vars = Vec::new();
+                        for arg in args {
+                            vars.push(self.eval(*arg));
+                        }
+                        f(vars).unwrap_or_else(|| {
+                            println!("{}Invalid function call: {}{:?}", Color::BrightRed, Color::Red, ident);
+                            flush_styles();
+                            std::process::exit(0);
+                        })
+                    }
+                    Function::Local(params, body) => {
+                        // create a new scope
+                        self.env.push_scope();
+                        // set the parameters
+                        for (param, arg) in params.iter().zip(args.iter()) {
+                            let p = self.eval(*arg.clone());
+                            self.env.set(param, p);
+                        }
+                        // run the body
+                        let result = self.eval(body.clone());
+                        // remove the scope
+                        self.env.pop_scope();
+                        result
                     }
                 }
             }

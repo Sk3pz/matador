@@ -68,7 +68,7 @@ Todo:
 - [x] conditionals (if/else)
 - [x] input
 - [x] variable type casting
-- [ ] literal variable typecasting
+- [ ] literal variable typecasting (i.e. `5 as float`)
 - [x] type checking
 - [ ] loops
   - [x] while
@@ -86,6 +86,7 @@ Todo:
 - [x] arrays
 - [ ] maps
 - [ ] ranges
+- [ ] in keyword
 - [ ] inc / dec operators (++ / --)
 - [ ] Assign and operate operators (+=, -=, *=, /=, %=)
 - [ ] functions
