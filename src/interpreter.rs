@@ -36,7 +36,7 @@ impl Interpreter {
     }
 
     fn eval(&mut self, node: Node) -> Variable {
-        if let Some(f) = &self.flag {
+        if self.flag.is_some() {
             return Variable::Int(0);
         }
         match node.clone() {
@@ -172,7 +172,7 @@ impl Interpreter {
             Node::ArrayMapAssign(ident, index, value) => {
                 // get the array if it exists from the environment
                 let mut array = self.env.get_or_else(&ident).to_array().unwrap_or_else(|| {
-                    println!("{}Invalid array access: {}{:?}", Color::BrightRed, Color::Red, ident);
+                    println!("{}Invalid array assign: {}{:?}", Color::BrightRed, Color::Red, ident);
                     flush_styles();
                     std::process::exit(0);
                 });

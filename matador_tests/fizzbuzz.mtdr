@@ -23,6 +23,5 @@ while x <= 100 {
         println(x)
     }
 
-
     x = x + 1
 }
