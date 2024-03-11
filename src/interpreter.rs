@@ -22,6 +22,10 @@ impl Interpreter {
         }
     }
 
+    pub fn register_native_function<S: Into<String>>(&mut self, name: S, f: fn(Vec<Variable>) -> Variable) {
+        self.env.push_function(name.into(), Function::Native(f));
+    }
+
     fn eval(&mut self, node: Node) -> Variable {
         match node.clone() {
             Node::Variable(n) => n,
@@ -356,11 +360,7 @@ impl Interpreter {
                         for arg in args {
                             vars.push(self.eval(*arg));
                         }
-                        f(vars).unwrap_or_else(|| {
-                            println!("{}Invalid function call: {}{:?}", Color::BrightRed, Color::Red, ident);
-                            flush_styles();
-                            std::process::exit(0);
-                        })
+                        f(vars)
                     }
                     Function::Local(params, body) => {
                         // create a new scope

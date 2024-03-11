@@ -121,9 +121,10 @@ impl Parser {
                 }
                 self.pos += 1; // consume left paren
                 println!("ident: {}", ident);
-                let params = Vec::new();
-                // todo: remove this
-                self.pos += 1; // consume right paren
+
+                // get the parameter ident list
+                let params = self.parse_ident_params(TokenType::Op(Operator::RParen));
+
                 let block = Box::new(self.next());
 
                 Node::FunctionDecl(ident, params, block)
@@ -208,7 +209,6 @@ impl Parser {
 
     pub fn should_shunt_from_lit(&self) -> bool {
         if self.pos < self.tokens.len() {
-            let next = &self.peek().token_type;
             match self.peek().token_type {
                 TokenType::Op(_) => true,
                 _ => false,
@@ -331,6 +331,30 @@ impl Parser {
                 std::process::exit(0);
             }
         }
+    }
+
+    fn parse_ident_params(&mut self, end: TokenType) -> Vec<String> {
+        let mut params = Vec::new();
+        // if the next token is the end token, then there are no parameters
+        if self.peek().token_type == end {
+            self.pos += 1;
+            return params;
+        }
+        loop {
+            params.push(self.consume_ident());
+            if self.peek().token_type == end {
+                self.pos += 1;
+                break;
+            }
+            if self.peek().token_type != TokenType::Comma {
+                // invalid token, dump info and exit
+                println!("{}Invalid parameter: {}{:?} @ {:?}", Color::BrightRed, Color::Red, self.peek().token_type, self.peek().pos);
+                flush_styles();
+                std::process::exit(0);
+            }
+            self.pos += 1;
+        }
+        params
     }
 
     // parse parameters separated by commas

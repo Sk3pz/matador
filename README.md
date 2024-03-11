@@ -90,6 +90,8 @@ Todo:
 - [ ] inc / dec operators (++ / --)
 - [ ] Assign and operate operators (+=, -=, *=, /=, %=)
 - [ ] functions
+  - [x] function declaration
+  - [x] function calls
   - [ ] replace built in keywords like readln and print with functions
 - [ ] structs
 - [ ] multi-file support
