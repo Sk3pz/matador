@@ -35,7 +35,7 @@ pub enum Node {
     Loop(Box<Node>),
     Continue,
     Break,
-    Return(Option<Variable>),
+    Return(Option<Box<Node>>),
 
     // arithmetic
     Expression, // ( ... )

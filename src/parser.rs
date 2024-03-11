@@ -132,7 +132,8 @@ impl Parser {
                 Node::Continue
             }
             TokenType::Return => {
-                todo!()
+                let expr = self.next();
+                Node::Return(Some(Box::new(expr)))
             }
 
             // arrays and maps
@@ -179,6 +180,7 @@ impl Parser {
         if self.pos < self.tokens.len() {
             match self.peek().token_type {
                 TokenType::Op(_) => true,
+                TokenType::RBrace => true,
                 _ => false,
             }
         } else {

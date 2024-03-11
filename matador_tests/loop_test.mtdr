@@ -6,3 +6,15 @@ while x < 10 {
     println(x)
     x = x + 1
 }
+
+let i = 0
+
+loop {
+    println("Hello " + x)
+    if i == 2 {
+        break
+    }
+    i = i + 1
+}
+
+println("Goodbye!")

@@ -9,7 +9,7 @@ use crate::scope::ScopeHandler;
 enum InterFlag {
     Break,
     Continue,
-    Return(Option<Variable>),
+    Return(Option<Box<Node>>),
 }
 
 pub struct Interpreter {
@@ -37,11 +37,7 @@ impl Interpreter {
 
     fn eval(&mut self, node: Node) -> Variable {
         if let Some(f) = &self.flag {
-            return match f {
-                InterFlag::Break => Variable::Int(0),
-                InterFlag::Continue => Variable::Int(0),
-                InterFlag::Return(v) => v.clone().unwrap_or(Variable::Int(0)),
-            };
+            return Variable::Int(0);
         }
         match node.clone() {
             Node::Variable(n) => n,
@@ -359,7 +355,15 @@ impl Interpreter {
                             self.env.set(param, p);
                         }
                         // run the body
-                        let result = self.eval(body.clone());
+                        let mut result = self.eval(body.clone());
+                        if let Some(f) = self.flag.clone() {
+                            if let InterFlag::Return(v) = f {
+                                self.flag = None;
+                                if let Some(v) = v {
+                                    result = self.eval(*v);
+                                }
+                            }
+                        }
                         // remove the scope
                         self.env.pop_scope();
                         result

@@ -1,9 +1,10 @@
+fn test() {
 
+    if true {
+        return 2
+    }
 
-loop {
-    println("Hello!")
-    break
-    println("here")
+    println("This shouldn't run")
 }
 
-println("Goodbye!")
+println(test())
