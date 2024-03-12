@@ -122,10 +122,10 @@ impl Interpreter {
             Node::Ident(ident) => {
                 self.env.get_or_else(&ident).clone()
             },
-            Node::Sizeof(ident) => {
-                let value = self.env.get_or_else(&ident);
+            Node::Sizeof(node) => {
+                let value = self.eval(*node.clone());
                 value.sizeof().unwrap_or_else(|| {
-                    println!("{}Invalid sizeof: {}{:?}", Color::BrightRed, Color::Red, ident);
+                    println!("{}Invalid sizeof: {}{:?}", Color::BrightRed, Color::Red, node);
                     flush_styles();
                     std::process::exit(0);
                 })
@@ -184,7 +184,7 @@ impl Interpreter {
                 let v = self.eval(*value);
 
                 // set the value in the array
-                array.assign(i.clone(), v.clone()).unwrap_or_else(|| {
+                array.assign(i.clone(), v).unwrap_or_else(|| {
                     println!("{}Invalid array index: {}{:?}", Color::BrightRed, Color::Red, i);
                     flush_styles();
                     std::process::exit(0);
@@ -192,7 +192,7 @@ impl Interpreter {
 
                 // update the array in the environment
                 self.env.set(&ident, array);
-                v
+                Variable::Int(0)
             }
             Node::TypeCast(ident, typ) => {
                 match *ident {

@@ -42,7 +42,7 @@ pub enum Node {
     Negative,
     Not,
 
-    Sizeof(String),
+    Sizeof(Box<Node>),
     Drop(String),
     Exit,
     EOF,

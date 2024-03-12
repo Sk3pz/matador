@@ -53,12 +53,8 @@ impl Parser {
                 }
             }
             TokenType::Sizeof => {
-                let ident = self.consume_ident();
-                if self.should_shunt_from_lit() {
-                    self.shunting_yard(Node::Sizeof(ident))
-                } else {
-                    Node::Sizeof(ident)
-                }
+                let node = self.next();
+                Node::Sizeof(Box::new(node))
             }
             TokenType::Drop => {
                 let ident = self.consume_ident();
@@ -484,9 +480,8 @@ impl Parser {
                         break;
                     }
                     self.pos += 1;
-                    let ident = self.consume_ident();
-                    self.pos -= 1; // because peak looks at current, not future
-                    postfix.push(ShuntedStackItem::Operand(Node::Sizeof(ident)));
+                    let next = self.next();
+                    postfix.push(ShuntedStackItem::Operand(Node::Sizeof(Box::new(next))));
                     last_op = None;
                     last_was_lit = true;
                 }

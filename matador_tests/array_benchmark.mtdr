@@ -1,0 +1,10 @@
+let arr = []
+
+let arr_size = 10000
+
+while arr_size > 0 {
+    arr = arr + 0
+    arr_size = arr_size - 1
+}
+
+println(sizeof arr)

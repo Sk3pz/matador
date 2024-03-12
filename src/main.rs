@@ -1,5 +1,6 @@
 use std::time::Duration;
 use better_term::{Color, flush_styles, Style};
+use crate::debug::timed;
 use crate::lexer::Lexer;
 use crate::variable::Variable;
 
@@ -15,16 +16,9 @@ pub mod debug;
 mod function;
 mod matador_std;
 
-const TEST_CODE: &str = include_str!("../matador_tests/general.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/array_benchmark.mtdr");
 
 pub const DEBUG_OUTPUT: bool = true;
-
-fn timed<F: FnOnce() -> R, R>(f: F) -> (R, Duration) {
-    let start = std::time::Instant::now();
-    let result = f();
-    let elapsed = start.elapsed();
-    (result, elapsed)
-}
 
 fn main() {
     println!("{}Matador {}v0.1ALPHA",
