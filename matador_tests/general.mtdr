@@ -1,10 +1,7 @@
-fn test() {
+let s = "Hello, World!"
 
-    if true {
-        return 2
-    }
-
-    println("This shouldn't run")
+if !(s is string) {
+    println("s is not a string")
+} else {
+    println("s is a string")
 }
-
-println(test())

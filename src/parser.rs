@@ -425,8 +425,9 @@ impl Parser {
                                 break; // this is to fix functions
                             }
 
-                            last_op = Some(op.clone());
-                            negative = false;
+                            // last_op = Some(op.clone());
+                            last_was_lit = true;
+                            last_op = None;
                         }
                         Operator::Minus => {
                             if last_op.is_some() {
@@ -481,6 +482,7 @@ impl Parser {
                     }
                     self.pos += 1;
                     let next = self.next();
+                    self.pos -= 1;
                     postfix.push(ShuntedStackItem::Operand(Node::Sizeof(Box::new(next))));
                     last_op = None;
                     last_was_lit = true;

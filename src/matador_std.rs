@@ -73,4 +73,21 @@ pub fn attach_std(interpreter: &mut Interpreter) {
             std::process::exit(1);
         }))
     });
+
+    // === CHAR ===
+    interpreter.register_native_function("to_ascii_char", |args| {
+        if args.len() > 1 {
+            // error
+            println!("{} to_ascii_char takes 1 argument", Color::Red);
+        }
+        let int = match args[0] {
+            Variable::Int(i) => i,
+            _ => {
+                println!("{} to_ascii_char takes an integer", Color::Red);
+                std::process::exit(1);
+            }
+        };
+        let c = int as u8 as char;
+        Variable::String(c.to_string())
+    });
 }

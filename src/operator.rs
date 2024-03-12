@@ -40,14 +40,14 @@ pub enum Operator {
 impl Operator {
     pub fn precedence(&self) -> Option<u8> {
         match self {
-            Operator::And | Operator::Or => Some(0),
+            Operator::And | Operator::Or | Operator::Not => Some(0),
             Operator::Eq | Operator::Neq | Operator::Gt | Operator::Lt |
             Operator::Gte | Operator::Lte => Some(1),
             Operator::Inc | Operator::Dec => Some(2),
             Operator::Plus | Operator::Minus => Some(3),
             Operator::Mul | Operator::Div | Operator::Mod => Some(4),
-            Operator::BitAnd | Operator::BitOr | Operator::Xor |
-            Operator::Not | Operator::LShift | Operator::RShift => Some(5),
+            Operator::BitAnd | Operator::BitOr | Operator::Xor
+            | Operator::LShift | Operator::RShift => Some(5),
             Operator::Pow => Some(6),
             _ => None,
         }
@@ -74,7 +74,6 @@ impl Operator {
             Operator::BitAnd => left.bitand(&right),
             Operator::BitOr => left.bitor(&right),
             Operator::Xor => left.xor(&right),
-            Operator::Not => left.not(),
             Operator::LShift => left.shl(&right),
             Operator::RShift => left.shr(&right),
 

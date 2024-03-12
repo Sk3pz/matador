@@ -16,9 +16,9 @@ pub mod debug;
 mod function;
 mod matador_std;
 
-const TEST_CODE: &str = include_str!("../matador_tests/array_benchmark.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/brainfuck2.mtdr");
 
-pub const DEBUG_OUTPUT: bool = true;
+pub const DEBUG_OUTPUT: bool = false;
 
 fn main() {
     println!("{}Matador {}v0.1ALPHA",

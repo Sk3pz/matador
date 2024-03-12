@@ -2,6 +2,7 @@ use better_term::{Color, flush_styles};
 use crate::function::Function;
 use crate::variable::{Variable, VariableType};
 use crate::node::Node;
+use crate::operator::Operator;
 use crate::postfix::ShuntedStackItem;
 use crate::scope::ScopeHandler;
 
@@ -68,6 +69,27 @@ impl Interpreter {
                         ShuntedStackItem::Operand(node) => {
                             operand_stack.push(self.eval(node));
                         },
+                        ShuntedStackItem::Operator(Operator::Minus) => {
+                            if operand_stack.len() == 1 {
+                                let right = operand_stack.pop().unwrap();
+                                operand_stack.push(right.neg().unwrap_or_else(|| {
+                                    println!("{}Invalid operation (syom): {}{:?}", Color::BrightRed, Color::Red, right);
+                                    flush_styles();
+                                    std::process::exit(0);
+                                }));
+                            } else {
+                                let right = operand_stack.pop().unwrap();
+                                let left = operand_stack.pop().unwrap();
+                                if let Some(lit) = Operator::Minus.apply_binary(left.clone(), right.clone()) {
+                                    operand_stack.push(lit);
+                                } else {
+                                    println!("{}Invalid operation (syobm): {}{:?} - {:?}",
+                                         Color::BrightRed, Color::Red, left, right);
+                                    flush_styles();
+                                    std::process::exit(0);
+                                }
+                            }
+                        },
                         ShuntedStackItem::Operator(op) => {
                             if !op.can_apply() {
                                 println!("{}Invalid operator: {}{:?}", Color::BrightRed, Color::Red, op);
@@ -97,6 +119,20 @@ impl Interpreter {
                             }
 
                             let right = pop_operand(&mut operand_stack);
+
+                            // unary check
+                            if op.is_unary() {
+                                if let Some(lit) = op.apply_unary(right.clone()) {
+                                    operand_stack.push(lit);
+                                } else {
+                                    println!("{}Invalid operation (syau): {}{:?} {} ; {:?}",
+                                         Color::BrightRed, Color::Red, op, right, node);
+                                    flush_styles();
+                                    std::process::exit(0);
+                                }
+                                continue;
+                            }
+
                             let left = pop_operand(&mut operand_stack);
 
                             if let Some(lit) = op.apply_binary(left.clone(), right.clone()) {
