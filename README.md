@@ -13,6 +13,9 @@
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠷⣦⣤⡾⠋⠀ 
 # Matador
 Matador is a general purpose interpreted programming language for embedding in games and other applications.
+
+** WARNING: Matador is still in early stages of development and is not ready for production use. 
+Features are subject to change and break.**
 ### Code Example (Currently runs):
 ```
 /*
