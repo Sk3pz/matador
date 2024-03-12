@@ -1,4 +1,4 @@
-// todo: this does not output the expected "Hello, World!"
+// todo: this does not output the expected "Hello World!"
 
 fn interpret(s) {
     if !(s is string) {
