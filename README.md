@@ -53,7 +53,11 @@ if operator == "+" {
 ```
 See [tests](./matador_tests) for more examples.  
 
-Todo:
+### Contributing
+Contributions are welcome! Please open an issue or pull request if you have any suggestions or changes you'd like to make.  
+Improvements to existing code are also more than welcome!
+
+### Todo:
 - [x] basic arithmetic
 - [x] comments
 - [x] types
