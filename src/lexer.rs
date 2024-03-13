@@ -4,7 +4,7 @@ use crate::variable::VariableType;
 use crate::operator::Operator;
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum TokenType {
+pub(crate) enum TokenType {
     // language keywords
     Let,
     Fn,
@@ -53,7 +53,7 @@ pub enum TokenType {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Token {
+pub(crate) struct Token {
     pub(crate) token_type: TokenType,
     lexeme: String,
     pub pos: (usize, usize), // line, char
@@ -65,7 +65,7 @@ impl Display for Token {
     }
 }
 
-pub struct Lexer<'a> {
+pub(crate) struct Lexer<'a> {
     source: &'a str,
     chars: Vec<char>,
     pos: usize,
@@ -73,7 +73,7 @@ pub struct Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(source: &'a str) -> Self {
+    pub(crate) fn new(source: &'a str) -> Self {
         Lexer {
             source,
             chars: source.chars().collect(),
@@ -82,7 +82,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn lex(&mut self) -> Vec<Token> {
+    pub(crate) fn lex(&mut self) -> Vec<Token> {
         let mut tokens = Vec::new();
         while self.pos < self.chars.len() {
             let token = self.next_token();

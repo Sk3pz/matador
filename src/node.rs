@@ -4,7 +4,7 @@ use crate::postfix::ShuntedStack;
 
 // AST Nodes
 #[derive(Debug, PartialEq, Clone)]
-pub enum Node {
+pub(crate) enum Node {
     // variables
     Variable(Variable),
     Ident(String),

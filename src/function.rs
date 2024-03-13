@@ -4,7 +4,7 @@ use crate::variable::Variable;
 pub type NativeFunction = fn(Vec<Variable>) -> Variable;
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Function {
+pub(crate) enum Function {
     // native rust functions
     Native(NativeFunction),
 

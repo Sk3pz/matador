@@ -7,17 +7,17 @@ use crate::node::Node;
 use crate::postfix::{ShuntedStack, ShuntedStackItem};
 
 // Parser
-pub struct Parser {
+pub(crate) struct Parser {
     tokens: Vec<Token>,
     pos: usize,
 }
 
 impl Parser {
-    pub fn new(tokens: Vec<Token>) -> Self {
+    pub(crate) fn new(tokens: Vec<Token>) -> Self {
         Parser { tokens, pos: 0 }
     }
 
-    pub fn parse(&mut self) -> Vec<Node> {
+    pub(crate) fn parse(&mut self) -> Vec<Node> {
         let mut nodes = Vec::new();
         while self.pos < self.tokens.len() {
             nodes.push(self.next());
@@ -172,7 +172,7 @@ impl Parser {
         }
     }
 
-    pub fn should_shunt_from_lit(&self) -> bool {
+    pub(crate) fn should_shunt_from_lit(&self) -> bool {
         if self.pos < self.tokens.len() {
             match self.peek().token_type {
                 TokenType::Op(_) => true,
@@ -184,7 +184,7 @@ impl Parser {
         }
     }
 
-    pub fn parse_block(&mut self) -> Node {
+    pub(crate) fn parse_block(&mut self) -> Node {
         let mut nodes = Vec::new();
         while self.peek().token_type != TokenType::RBrace {
             nodes.push(self.next());
@@ -192,7 +192,7 @@ impl Parser {
         Node::Block(nodes)
     }
 
-    pub fn parse_ident(&mut self, ident: String) -> Node {
+    pub(crate) fn parse_ident(&mut self, ident: String) -> Node {
         let token = &self.tokens[self.pos];
         let ident = ident.clone();
         if self.pos >= self.tokens.len() {

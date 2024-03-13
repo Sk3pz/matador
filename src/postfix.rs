@@ -3,7 +3,7 @@ use crate::node::Node;
 use crate::operator::Operator;
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum ShuntedStackItem {
+pub(crate) enum ShuntedStackItem {
     Operator(Operator),
     Operand(Node),
 }
@@ -18,7 +18,7 @@ impl Display for ShuntedStackItem {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct ShuntedStack {
+pub(crate) struct ShuntedStack {
     items: Vec<ShuntedStackItem>,
     current_iter: usize,
 }

@@ -2,7 +2,7 @@ use std::fmt::Display;
 use crate::variable::Variable;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub enum Operator {
+pub(crate) enum Operator {
     // arithmetic
     Plus,   // +
     Minus,  // -
@@ -38,7 +38,7 @@ pub enum Operator {
 }
 
 impl Operator {
-    pub fn precedence(&self) -> Option<u8> {
+    pub(crate) fn precedence(&self) -> Option<u8> {
         match self {
             Operator::And | Operator::Or | Operator::Not => Some(0),
             Operator::Eq | Operator::Neq | Operator::Gt | Operator::Lt |
@@ -53,14 +53,14 @@ impl Operator {
         }
     }
 
-    pub fn can_apply(&self) -> bool {
+    pub(crate) fn can_apply(&self) -> bool {
         match self {
             Operator::Range  => false,
             _ => true,
         }
     }
 
-    pub fn apply_binary(&self, left: Variable, right: Variable) -> Option<Variable> {
+    pub(crate) fn apply_binary(&self, left: Variable, right: Variable) -> Option<Variable> {
         match self {
             // standard
             Operator::Plus => left.add(&right),
@@ -92,14 +92,14 @@ impl Operator {
         }
     }
 
-    pub fn is_unary(&self) -> bool {
+    pub(crate) fn is_unary(&self) -> bool {
         match self {
             Operator::Inc | Operator::Dec | Operator::Minus | Operator::Not => true,
             _ => false,
         }
     }
 
-    pub fn apply_unary(&self, left: Variable) -> Option<Variable> {
+    pub(crate) fn apply_unary(&self, left: Variable) -> Option<Variable> {
         match self {
             Operator::Inc => left.inc(),
             Operator::Dec => left.dec(),

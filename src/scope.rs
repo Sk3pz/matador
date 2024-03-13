@@ -51,26 +51,26 @@ impl Scope {
 }
 
 #[derive(Debug, Clone)]
-pub struct ScopeHandler {
+pub(crate) struct ScopeHandler {
     scopes: Vec<Scope>,
 }
 
 impl ScopeHandler {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         ScopeHandler {
             scopes: vec![Scope::new()],
         }
     }
 
-    pub fn push_scope(&mut self) {
+    pub(crate) fn push_scope(&mut self) {
         self.scopes.push(Scope::new());
     }
 
-    pub fn pop_scope(&mut self) {
+    pub(crate) fn pop_scope(&mut self) {
         self.scopes.pop();
     }
 
-    pub fn set(&mut self, ident: &str, value: Variable) {
+    pub(crate) fn set(&mut self, ident: &str, value: Variable) {
         // set a variable in one of the scopes
         for scope in self.scopes.iter_mut().rev() {
             if scope.get(ident).is_some() {
@@ -83,7 +83,7 @@ impl ScopeHandler {
         self.scopes.last_mut().unwrap().set(ident, value);
     }
 
-    pub fn get(&self, ident: &str) -> Option<&Variable> {
+    pub(crate) fn get(&self, ident: &str) -> Option<&Variable> {
         for scope in self.scopes.iter().rev() {
             if let Some(value) = scope.get(ident) {
                 return Some(value);
@@ -92,7 +92,7 @@ impl ScopeHandler {
         None
     }
 
-    pub fn get_or_else(&self, ident: &str) -> Variable {
+    pub(crate) fn get_or_else(&self, ident: &str) -> Variable {
         for scope in self.scopes.iter().rev() {
             if let Some(value) = scope.get(ident) {
                 return value.clone();
@@ -103,7 +103,7 @@ impl ScopeHandler {
         std::process::exit(0);
     }
 
-    pub fn get_function(&self, ident: String) -> Option<&Function> {
+    pub(crate) fn get_function(&self, ident: String) -> Option<&Function> {
         for scope in self.scopes.iter().rev() {
             if let Some(value) = scope.get_function(ident.clone()) {
                 return Some(value);
@@ -112,7 +112,7 @@ impl ScopeHandler {
         None
     }
 
-    pub fn function_exists(&self, ident: String) -> bool {
+    pub(crate) fn function_exists(&self, ident: String) -> bool {
         for scope in self.scopes.iter().rev() {
             if scope.function_exists(ident.clone()) {
                 return true;
@@ -121,11 +121,11 @@ impl ScopeHandler {
         false
     }
 
-    pub fn push_function(&mut self, ident: String, function: Function) {
+    pub(crate) fn push_function(&mut self, ident: String, function: Function) {
         self.scopes.last_mut().unwrap().push_function(ident, function);
     }
 
-    pub fn remove(&mut self, ident: &str) {
+    pub(crate) fn remove(&mut self, ident: &str) {
         for scope in self.scopes.iter_mut().rev() {
             if scope.get(ident).is_some() {
                 scope.remove(ident);

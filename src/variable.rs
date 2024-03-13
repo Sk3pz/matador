@@ -2,7 +2,7 @@ use std::fmt::Display;
 use better_term::{Color, flush_styles};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub enum VariableType {
+pub(crate) enum VariableType {
     Int,
     Float,
     String,
@@ -29,7 +29,7 @@ impl Display for VariableType {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Variable {
+pub(crate) enum Variable {
     // static types
     Int(i64),
     Float(f64),
@@ -44,7 +44,7 @@ pub enum Variable {
 
 impl Variable {
 
-    pub fn add(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn add(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Int(a + b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Float(a + b)),
@@ -78,7 +78,7 @@ impl Variable {
         }
     }
 
-    pub fn sub(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn sub(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Int(a - b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Float(a - b)),
@@ -86,7 +86,7 @@ impl Variable {
         }
     }
 
-    pub fn mul(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn mul(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Int(a * b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Float(a * b)),
@@ -94,7 +94,7 @@ impl Variable {
         }
     }
 
-    pub fn div(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn div(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Int(a / b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Float(a / b)),
@@ -102,7 +102,7 @@ impl Variable {
         }
     }
 
-    pub fn rem(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn rem(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Int(a % b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Float(a % b)),
@@ -110,7 +110,7 @@ impl Variable {
         }
     }
 
-    pub fn pow(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn pow(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Int(a.pow(*b as u32))),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Float(a.powf(*b))),
@@ -118,7 +118,7 @@ impl Variable {
         }
     }
 
-    pub fn inc(&self) -> Option<Variable> {
+    pub(crate) fn inc(&self) -> Option<Variable> {
         match self {
             Variable::Int(a) => Some(Variable::Int(a + 1)),
             Variable::Float(a) => Some(Variable::Float(a + 1.0)),
@@ -126,7 +126,7 @@ impl Variable {
         }
     }
 
-    pub fn dec(&self) -> Option<Variable> {
+    pub(crate) fn dec(&self) -> Option<Variable> {
         match self {
             Variable::Int(a) => Some(Variable::Int(a - 1)),
             Variable::Float(a) => Some(Variable::Float(a - 1.0)),
@@ -134,7 +134,7 @@ impl Variable {
         }
     }
 
-    pub fn eq(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn eq(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Bool(a == b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Bool(a == b)),
@@ -144,7 +144,7 @@ impl Variable {
         }
     }
 
-    pub fn neq(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn neq(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Bool(a != b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Bool(a != b)),
@@ -154,7 +154,7 @@ impl Variable {
         }
     }
 
-    pub fn gt(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn gt(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Bool(a > b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Bool(a > b)),
@@ -162,7 +162,7 @@ impl Variable {
         }
     }
 
-    pub fn lt(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn lt(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Bool(a < b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Bool(a < b)),
@@ -170,7 +170,7 @@ impl Variable {
         }
     }
 
-    pub fn gte(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn gte(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Bool(a >= b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Bool(a >= b)),
@@ -178,7 +178,7 @@ impl Variable {
         }
     }
 
-    pub fn lte(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn lte(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Bool(a <= b)),
             (Variable::Float(a), Variable::Float(b)) => Some(Variable::Bool(a <= b)),
@@ -186,42 +186,42 @@ impl Variable {
         }
     }
 
-    pub fn bitand(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn bitand(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Bool(a), Variable::Bool(b)) => Some(Variable::Bool(*a && *b)),
             _ => None,
         }
     }
 
-    pub fn bitor(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn bitor(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Bool(a), Variable::Bool(b)) => Some(Variable::Bool(*a || *b)),
             _ => None,
         }
     }
 
-    pub fn xor(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn xor(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Bool(a), Variable::Bool(b)) => Some(Variable::Bool(*a ^ *b)),
             _ => None,
         }
     }
 
-    pub fn shl(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn shl(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Int(a << b)),
             _ => None,
         }
     }
 
-    pub fn shr(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn shr(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Int(a), Variable::Int(b)) => Some(Variable::Int(a >> b)),
             _ => None,
         }
     }
 
-    pub fn not(&self) -> Option<Variable> {
+    pub(crate) fn not(&self) -> Option<Variable> {
         match self {
             Variable::Int(a) => Some(Variable::Int(!*a)),
             Variable::Bool(a) => Some(Variable::Bool(!*a)),
@@ -229,21 +229,21 @@ impl Variable {
         }
     }
 
-    pub fn and(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn and(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Bool(a), Variable::Bool(b)) => Some(Variable::Bool(*a && *b)),
             _ => None,
         }
     }
 
-    pub fn or(&self, other: &Variable) -> Option<Variable> {
+    pub(crate) fn or(&self, other: &Variable) -> Option<Variable> {
         match (self, other) {
             (Variable::Bool(a), Variable::Bool(b)) => Some(Variable::Bool(*a || *b)),
             _ => None,
         }
     }
 
-    pub fn neg(&self) -> Option<Variable> {
+    pub(crate) fn neg(&self) -> Option<Variable> {
         match self {
             Variable::Int(a) => Some(Variable::Int(-*a)),
             Variable::Float(a) => Some(Variable::Float(-*a)),
@@ -251,7 +251,7 @@ impl Variable {
         }
     }
 
-    pub fn to_int(&self) -> Option<Variable> {
+    pub(crate) fn to_int(&self) -> Option<Variable> {
         match self {
             Variable::Int(a) => Some(Variable::Int(*a)),
             Variable::Float(a) => Some(Variable::Int(*a as i64)),
@@ -266,7 +266,7 @@ impl Variable {
         }
     }
 
-    pub fn to_float(&self) -> Option<Variable> {
+    pub(crate) fn to_float(&self) -> Option<Variable> {
         match self {
             Variable::Int(a) => Some(Variable::Float(*a as f64)),
             Variable::Float(a) => Some(Variable::Float(*a)),
@@ -280,7 +280,7 @@ impl Variable {
         }
     }
 
-    pub fn to_string(&self) -> Option<Variable> {
+    pub(crate) fn to_string(&self) -> Option<Variable> {
         match self {
             Variable::Int(a) => Some(Variable::String(a.to_string())),
             Variable::Float(a) => Some(Variable::String(a.to_string())),
@@ -290,7 +290,7 @@ impl Variable {
         }
     }
 
-    pub fn to_bool(&self) -> Option<Variable> {
+    pub(crate) fn to_bool(&self) -> Option<Variable> {
         match self {
             Variable::Int(a) => Some(Variable::Bool(*a != 0)),
             Variable::Float(a) => Some(Variable::Bool(*a != 0.0)),
@@ -300,7 +300,7 @@ impl Variable {
         }
     }
 
-    pub fn to_array(&self) -> Option<Variable> {
+    pub(crate) fn to_array(&self) -> Option<Variable> {
         match self {
             Variable::Int(a) => Some(Variable::Array(vec![Box::new(Variable::Int(*a))])),
             Variable::Float(a) => Some(Variable::Array(vec![Box::new(Variable::Float(*a))])),
@@ -311,21 +311,21 @@ impl Variable {
         }
     }
 
-    pub fn to_map(&self) -> Option<Variable> {
+    pub(crate) fn to_map(&self) -> Option<Variable> {
         match self {
             Variable::Map(a) => Some(Variable::Map(a.clone())),
             _ => None,
         }
     }
 
-    pub fn to_range(&self) -> Option<Variable> {
+    pub(crate) fn to_range(&self) -> Option<Variable> {
         match self {
             Variable::Range(a, b) => Some(Variable::Range(*a, *b)),
             _ => None,
         }
     }
 
-    pub fn access(&self, i: Variable) -> Option<Variable> {
+    pub(crate) fn access(&self, i: Variable) -> Option<Variable> {
         match (self, i) {
             (Variable::String(s), Variable::Int(i)) => {
                 if i < 0 || i as usize >= s.len() {
@@ -357,7 +357,7 @@ impl Variable {
         }
     }
 
-    pub fn assign(&mut self, i: Variable, v: Variable) -> Option<Variable> {
+    pub(crate) fn assign(&mut self, i: Variable, v: Variable) -> Option<Variable> {
         match self {
             Variable::String(s) => {
                 // insert a string at a specific index
@@ -406,7 +406,7 @@ impl Variable {
         }
     }
 
-    pub fn sizeof(&self) -> Option<Variable> {
+    pub(crate) fn sizeof(&self) -> Option<Variable> {
         match self {
             Variable::String(s) => Some(Variable::Int(s.len() as i64)),
             Variable::Array(a) => Some(Variable::Int(a.len() as i64)),
