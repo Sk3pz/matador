@@ -1,5 +1,5 @@
 use better_term::{Color, flush_styles};
-use crate::function::Function;
+use crate::function::{Function, NativeFunction};
 use crate::variable::{Variable, VariableType};
 use crate::node::Node;
 use crate::operator::Operator;
@@ -32,7 +32,7 @@ impl Interpreter {
         }
     }
 
-    pub fn register_native_function<S: Into<String>>(&mut self, name: S, f: fn(Vec<Variable>) -> Variable) {
+    pub fn register_native_function<S: Into<String>>(&mut self, name: S, f: NativeFunction) {
         self.env.push_function(name.into(), Function::Native(f));
     }
 
