@@ -1,4 +1,4 @@
-    ⠀⠀⣴⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ⢸⣦⡀⠀  
+    ⠀⠀⣴⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀   ⢸⣦⡀⠀  
     ⠀⢸⣿⣧⣀⣀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀ ⣀⡀⠀⠀⠀⢀⣀⣼⣿⡧⠀  
     ⠀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⠿⠁⠀  
     ⠀⠀⠀⠀⠙⠛⠿⠿⠿⠿⣿⠀⠀⠀⠀⠀⠀⠀⠀⣿⡿⠿⠿⠿⠛⠋⠁⠀⠀⠀  
@@ -66,7 +66,7 @@ Improvements to existing code are also more than welcome!
 - [x] conditionals (if/else)
 - [x] input
 - [x] variable type casting
-- [ ] literal variable typecasting (i.e. `5 as float`)
+- [ ] literal variable typecasting (i.e. `5 as float` or `arr[x] as int`)
 - [x] type checking
 - [ ] loops
   - [x] while
@@ -84,7 +84,7 @@ Improvements to existing code are also more than welcome!
 - [x] arrays
 - [ ] maps
 - [ ] ranges
-- [ ] in keyword
+- [ ] in keyword (for iterating over arrays, maps, and ranges)
 - [ ] inc / dec operators (++ / --)
 - [ ] Assign and operate operators (+=, -=, *=, /=, %=)
 - [ ] functions
