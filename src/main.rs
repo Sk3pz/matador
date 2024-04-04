@@ -15,7 +15,7 @@ pub mod debug;
 mod function;
 mod matador_std;
 
-const TEST_CODE: &str = include_str!("../matador_tests/brainfuck2.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/brainfuck.mtdr");
 
 pub const DEBUG_OUTPUT: bool = false;
 
@@ -33,7 +33,9 @@ fn main() {
         let mut parser = parser::Parser::new(tokens);
         parser.parse()
     });
-    Node::prgm_display(&nodes);
+    if DEBUG_OUTPUT {
+        Node::prgm_display(&nodes);
+    }
     let (_, interpret_time) = timed(|| {
         let mut interpreter = interpreter::Interpreter::new();
         matador_std::attach_std(&mut interpreter);

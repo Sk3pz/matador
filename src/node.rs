@@ -86,12 +86,13 @@ impl Node {
                 s
             }
             Node::If(cond, then, els) => {
-                let mut s = format!("If: {}\n", cond);
+                let mut s = format!("{}If: {}\n",depth, cond);
                 if let Some(then) = then {
                     s.push_str(&then.to_display_string(&(*depth + 1)));
                     s.push_str("\n");
                 }
                 if let Some(els) = els {
+                    s.push_str(format!("{}{}Else:\n", spaces, depth).as_str());
                     s.push_str(&els.to_display_string(&(*depth + 1)));
                     s.push_str("\n");
                 }
