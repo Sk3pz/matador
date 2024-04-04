@@ -75,6 +75,7 @@ pub fn attach_std(interpreter: &mut Interpreter) {
     });
 
     // === CHAR ===
+    // todo: remove this and add a char variable type
     interpreter.register_native_function("to_ascii_char", |args| {
         if args.len() > 1 {
             // error

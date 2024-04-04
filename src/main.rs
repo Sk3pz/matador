@@ -15,7 +15,7 @@ pub mod debug;
 mod function;
 mod matador_std;
 
-const TEST_CODE: &str = include_str!("../matador_tests/brainfuck.mtdr");
+const TEST_CODE: &str = include_str!("../matador_tests/brainfuck2.mtdr");
 
 pub const DEBUG_OUTPUT: bool = false;
 
