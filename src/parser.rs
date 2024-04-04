@@ -7,17 +7,17 @@ use crate::node::Node;
 use crate::postfix::{ShuntedStack, ShuntedStackItem};
 
 // Parser
-pub(crate) struct Parser {
+pub struct Parser {
     tokens: Vec<Token>,
     pos: usize,
 }
 
 impl Parser {
-    pub(crate) fn new(tokens: Vec<Token>) -> Self {
+    pub fn new(tokens: Vec<Token>) -> Self {
         Parser { tokens, pos: 0 }
     }
 
-    pub(crate) fn parse(&mut self) -> Vec<Node> {
+    pub fn parse(&mut self) -> Vec<Node> {
         let mut nodes = Vec::new();
         while self.pos < self.tokens.len() {
             nodes.push(self.next());
@@ -202,7 +202,7 @@ impl Parser {
             TokenType::Assign => {
                 self.pos += 1;
                 let expr = self.next();
-                Node::VarDecl(ident, Some(Box::new(expr)))
+                Node::VarAssign(ident, Box::new(expr))
             }
             // array / map access and assignment
             TokenType::LBracket => { // [

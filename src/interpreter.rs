@@ -180,6 +180,19 @@ impl Interpreter {
                 self.env.set(&ident, value.clone());
                 value
             }
+            Node::VarAssign(ident, value) => {
+                // ensure the variable exists
+                if !self.env.variable_exists(&ident) {
+                    println!("{}Invalid variable assignment: {}{:?}", Color::BrightRed, Color::Red, ident);
+                    flush_styles();
+                    std::process::exit(0);
+                }
+
+                // set the variable
+                let v = self.eval(*value);
+                self.env.set(&ident, v.clone());
+                v
+            }
             Node::Array(nodes) => {
                 let mut array = Vec::new();
                 for node in nodes {

@@ -33,6 +33,10 @@ impl Scope {
         self.variables.insert(ident.to_string(), value);
     }
 
+    fn variable_exists(&self, ident: &str) -> bool {
+        self.variables.contains_key(ident)
+    }
+
     fn get(&self, ident: &str) -> Option<&Variable> {
         self.variables.get(ident)
     }
@@ -115,6 +119,15 @@ impl ScopeHandler {
     pub(crate) fn function_exists(&self, ident: String) -> bool {
         for scope in self.scopes.iter().rev() {
             if scope.function_exists(ident.clone()) {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub(crate) fn variable_exists(&self, ident: &str) -> bool {
+        for scope in self.scopes.iter().rev() {
+            if scope.variable_exists(ident) {
                 return true;
             }
         }

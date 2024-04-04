@@ -21,7 +21,7 @@ fn interpret(s) {
     while i < sizeof s {
         // > moves the pointer to the right
         if s[i] == ">" {
-            if ptr == len - 1 { // expand the memory
+            if ptr == len - 1 {
                 ptr = 0
             } else {
                 ptr = ptr + 1

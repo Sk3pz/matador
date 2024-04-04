@@ -65,7 +65,7 @@ impl Display for Token {
     }
 }
 
-pub(crate) struct Lexer<'a> {
+pub struct Lexer<'a> {
     source: &'a str,
     chars: Vec<char>,
     pos: usize,
@@ -73,7 +73,7 @@ pub(crate) struct Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
-    pub(crate) fn new(source: &'a str) -> Self {
+    pub fn new(source: &'a str) -> Self {
         Lexer {
             source,
             chars: source.chars().collect(),
@@ -82,7 +82,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub(crate) fn lex(&mut self) -> Vec<Token> {
+    pub fn lex(&mut self) -> Vec<Token> {
         let mut tokens = Vec::new();
         while self.pos < self.chars.len() {
             let token = self.next_token();

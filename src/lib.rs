@@ -1,4 +1,5 @@
 // this is for embedding matador in other programs
+
 use crate::lexer::Lexer;
 use crate::parser::Parser;
 

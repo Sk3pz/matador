@@ -15,6 +15,7 @@ pub(crate) enum Node {
     // operations
     ShuntedStack(ShuntedStack),
     VarDecl(String, Option<Box<Node>>),
+    VarAssign(String, Box<Node>),
 
     // array
     Array(Vec<Box<Node>>),
@@ -49,9 +50,117 @@ pub(crate) enum Node {
 }
 
 impl Node {
-    pub fn display(nodes: &Vec<Node>) {
+    fn to_display_string(&self, depth: &u32) -> String {
+        let spaces = "  ".repeat(*depth as usize);
+        format!("{}{}", spaces, match self {
+            Node::Variable(v) => { format!("Variable: {}", v) }
+            Node::Ident(ident) => { format!("Ident: {}", ident) }
+            Node::Negative => { "Negative".to_string() }
+            Node::Not => { "Not".to_string() }
+            Node::Expression => { "Expression".to_string() }
+            Node::ShuntedStack(stack) => { format!("ShuntedStack: {:?}", stack) }
+            Node::Block(nodes) => {
+                let mut s = "Block:\n".to_string();
+                for node in nodes {
+                    s.push_str(&node.to_display_string(&(*depth + 1)));
+                    s.push_str("\n");
+                }
+                s
+            }
+            Node::FunctionDecl(ident, args, block) => {
+                let mut s = format!("FunctionDecl: {}(", ident);
+                for arg in args {
+                    s.push_str(&arg.to_string());
+                    s.push_str(",");
+                }
+                s.push_str(")\n");
+                s.push_str(&block.to_display_string(&(*depth + 1)));
+                s
+            }
+            Node::FunctionCall(ident, args) => {
+                let mut s = format!("FunctionCall: {}\n", ident);
+                for arg in args {
+                    s.push_str(&arg.to_string());
+                    s.push_str("\n");
+                }
+                s
+            }
+            Node::If(cond, then, els) => {
+                let mut s = format!("If: {}\n", cond);
+                if let Some(then) = then {
+                    s.push_str(&then.to_display_string(&(*depth + 1)));
+                    s.push_str("\n");
+                }
+                if let Some(els) = els {
+                    s.push_str(&els.to_display_string(&(*depth + 1)));
+                    s.push_str("\n");
+                }
+                s
+            }
+            Node::While(cond, block) => {
+                let mut s = format!("While: {}\n", cond);
+                s.push_str(&block.to_display_string(&(*depth + 1)));
+                s
+            }
+            Node::Loop(block) => { format!("Loop: {}", block) }
+            Node::Continue => { "Continue".to_string() }
+            Node::Break => { "Break".to_string() }
+            Node::Return(v) => {
+                if let Some(v) = v {
+                    format!("Return: {}", v)
+                } else {
+                    "Return".to_string()
+                }
+            }
+            Node::VarDecl(ident, typ) => {
+                if let Some(typ) = typ {
+                    format!("VarDecl: {} to {}", ident, typ)
+                } else {
+                    format!("VarDecl: {}", ident)
+                }
+            }
+            Node::VarAssign(ident, value) => { format!("VarAssign: {} to {}", ident, value) }
+            Node::Array(nodes) => {
+                let mut s = "Array:\n".to_string();
+                for node in nodes {
+                    s.push_str(&node.to_display_string(&(*depth + 1)));
+                    s.push_str("\n");
+                }
+                s
+            }
+            Node::ArrayMapAccess(ident, index) => { format!("ArrayMapAccess: {} at {}", ident, index) }
+            Node::ArrayMapAssign(ident, index, value) => { format!("ArrayMapAssign: {} at {} to {}", ident, index, value) }
+            Node::Map(nodes) => {
+                let mut s = "Map:\n".to_string();
+                for (key, value) in nodes {
+                    s.push_str(&key.to_display_string(&(*depth + 1)));
+                    s.push_str(&value.to_string());
+                    s.push_str("\n");
+                }
+                s
+            }
+            Node::TypeCast(node, typ) => { format!("TypeCast: {} to {}", node, typ) }
+            Node::TypeCheck(node, typ) => { format!("TypeCheck: {} is {}", node, typ) }
+            Node::Sizeof(ident) => { format!("Sizeof: {}", ident) }
+            Node::Drop(node) => { format!("Drop: {}", node) }
+            Node::Exit => { "Exit".to_string() }
+            Node::EOF => { "EOF".to_string() }
+            _ => { "???".to_string() }
+        })
+    }
+
+    pub fn display(&self, depth: u32) {
+        // print depth spaces
+        for _ in 0..depth {
+            print!("  ");
+        }
+        println!("{}", self.to_display_string(&depth));
+    }
+
+    pub fn prgm_display(nodes: &Vec<Node>) {
+        let depth = 0;
         for node in nodes {
-            println!("{}", node);
+            node.display(depth);
         }
     }
 }
@@ -66,23 +175,23 @@ impl Display for Node {
             Node::Expression => write!(f, "EXPR"),
             Node::ShuntedStack(stack) => write!(f, "STACK({:?})", stack),
             Node::Block(nodes) => {
-                write!(f, "BLOCK{{")?;
+                writeln!(f, "BLOCK {{")?;
                 for node in nodes {
-                    write!(f, "{} ", node)?;
+                    writeln!(f, "{} ", node)?;
                 }
                 write!(f, "}}")
             }
             Node::FunctionDecl(ident, args, block) => {
-                write!(f, "FUNCTION '{}'(", ident)?;
+                writeln!(f, "FUNCTION '{}'(", ident)?;
                 for arg in args {
-                    write!(f, "{} ", arg)?;
+                    writeln!(f, "{} ", arg)?;
                 }
                 write!(f, ") {}", block)
             }
             Node::FunctionCall(ident, args) => {
                 write!(f, "CALL '{}'(", ident)?;
                 for arg in args {
-                    write!(f, "{} ", arg)?;
+                    writeln!(f, "{} ", arg)?;
                 }
                 write!(f, ")")
             }
@@ -120,6 +229,7 @@ impl Display for Node {
                     write!(f, "ALLOCATE '{}'", ident)
                 }
             }
+            Node::VarAssign(ident, value) => write!(f, "ASSIGN '{}' TO {}", ident, value),
             Node::Array(nodes) => {
                 write!(f, "ARRAY[")?;
                 for node in nodes {

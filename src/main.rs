@@ -1,8 +1,7 @@
-use std::time::Duration;
 use better_term::{Color, flush_styles, Style};
 use crate::debug::timed;
 use crate::lexer::Lexer;
-use crate::variable::Variable;
+use crate::node::Node;
 
 mod parser;
 mod node;
@@ -34,6 +33,7 @@ fn main() {
         let mut parser = parser::Parser::new(tokens);
         parser.parse()
     });
+    Node::prgm_display(&nodes);
     let (_, interpret_time) = timed(|| {
         let mut interpreter = interpreter::Interpreter::new();
         matador_std::attach_std(&mut interpreter);
